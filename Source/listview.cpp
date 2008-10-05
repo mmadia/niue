@@ -18,32 +18,28 @@
 	advised of the possibility of such damage. 
 
 *///-----------------------------------------------------------------------------
-
-
-
 #include "listview.h"
-//#include "niue.h"
 
 
 listview::listview(BRect rect, char *name)
 	: BView(rect, name, B_FOLLOW_LEFT | B_FOLLOW_TOP_BOTTOM, B_WILL_DRAW)
 {
 	
-	fList = new RocketView(BRect(rect.left+7,rect.top-11,rect.right-22,rect.Height()-5));
-	WorkScroll = new BScrollView("WorkScroll", fList, B_FOLLOW_ALL_SIDES, B_WILL_DRAW, false, true, B_PLAIN_BORDER);
-	
+	fList = new RocketView(BRect(rect.left + 7,rect.top - 11,rect.right - 22,
+								rect.Height() - 5));
+	WorkScroll = new BScrollView("WorkScroll", fList, B_FOLLOW_ALL_SIDES,
+								B_WILL_DRAW, false, true, B_PLAIN_BORDER);
 	AddChild(WorkScroll);
 }
 
 
-void listview::MessageReceived(BMessage *msg)
+void
+listview::MessageReceived(BMessage *msg)
 {
-	
-	switch(msg->what)
+	switch (msg->what)
 	{
 		case ITEM_MENU_SELECTED_MSG:
 		{
-			
 			entry_ref *fileref = FindItem();
 			
 			BNode node(fileref);
@@ -70,16 +66,15 @@ void listview::MessageReceived(BMessage *msg)
 //			{
 //				//be_roster->Launch(fileref);
 //			}
+			break;
 		}
-		break;
 			
 		case ITEM_MENU_INVOKED_MSG:
 		{
 //			entry_ref *fileref = FindItem();
 //			be_roster->Launch(fileref);
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_SET_SOURCE:
 		{
 			entry_ref *fileref = FindItem();
@@ -91,9 +86,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_MAKEFILE:
 		{
 			entry_ref *fileref = FindItem();
@@ -105,9 +99,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_RESOURCE:
 		{
 			entry_ref *fileref = FindItem();
@@ -119,9 +112,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_TEXT:
 		{
 			entry_ref *fileref = FindItem();
@@ -133,9 +125,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_IMAGE:
 		{
 			entry_ref *fileref = FindItem();
@@ -147,9 +138,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_AUDIO:
 		{
 			entry_ref *fileref = FindItem();
@@ -161,9 +151,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_VIDEO:
 		{
 			entry_ref *fileref = FindItem();
@@ -175,9 +164,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
 		case MNU_LEFT_SET_APP:
 		{
 			entry_ref *fileref = FindItem();
@@ -189,9 +177,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_SET_ARCHIVE:
 		{
 			entry_ref *fileref = FindItem();
@@ -203,17 +190,14 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//rebuild list
 			BuildList(startref);
+			break;
 		}
-		break;
-
-		
 		case MNU_LEFT_OPEN_MSG:
 		{
 			entry_ref *fileref = FindItem();
 			be_roster->Launch(fileref);
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_TRACKER_MSG:
 		{
 			BString sysstring;
@@ -228,9 +212,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//(new BAlert("Niue", sysstring.String(), "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 			system(sysstring.String());
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_TRASH_MSG:
 		{
 			//(new BAlert("Niue", "trash it", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
@@ -245,10 +228,8 @@ void listview::MessageReceived(BMessage *msg)
 			trashdir.SetTo(trashpath.Path());
 			
 			fileentry.MoveTo(&trashdir, 0, true);
-			
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_DUPLICATE_MSG:
 		{
 			BString duplistring;
@@ -267,9 +248,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			//(new BAlert("Niue", duplistring.String(), "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 			system(duplistring.String());
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_INFO_MSG:
 		{
 			//get item, create vars
@@ -308,13 +288,9 @@ void listview::MessageReceived(BMessage *msg)
 			infostring << path.Path();
 			infostring << "\n\n";
 			
-			
-			
-			
 			(new BAlert("Niue file info", infostring.String(), "Close", 0, 0, B_WIDTH_AS_USUAL, B_INFO_ALERT))->Go();
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_NAME_MSG:
 		{
 			entry_ref *fileref = FindItem();
@@ -332,9 +308,8 @@ void listview::MessageReceived(BMessage *msg)
 			
 			BWindow* renameWindow = new renamewindow(textrect, fileentry);
 			renameWindow->Show();
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_COPY_MSG:
 		{
 			entry_ref *fileref = FindItem();
@@ -350,9 +325,8 @@ void listview::MessageReceived(BMessage *msg)
 			CopyPanel->SetTarget(this);
 			CopyPanel->SetSaveText(name);
 			CopyPanel->Show();	
+			break;
 		}
-		break;
-		
 		case MNU_LEFT_MOVE_MSG:
 		{
 			entry_ref *fileref = FindItem();
@@ -368,12 +342,10 @@ void listview::MessageReceived(BMessage *msg)
 			CopyPanel->SetTarget(this);
 			CopyPanel->SetSaveText(name);
 			CopyPanel->Show();	
+			break;
 		}
-		break;
-		
 		case B_SAVE_REQUESTED:
 		{
-			
 			//get item entry
 			entry_ref *fileref = FindItem();
 			BEntry fileentry;
@@ -394,40 +366,32 @@ void listview::MessageReceived(BMessage *msg)
 				
 				BString copystring;
 				if (keepfile == true)
-				{
 					copystring << "cp ";
-				}
 				else
-				{
 					copystring << "mv ";
-				}
 				copystring << filepath.Path();
 				copystring << " ";
 				copystring << dirpath.Path();
 				copystring << "/";
 				copystring << namestring;
 				
-				
 				//(new BAlert("Niue", copystring.String(), "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 				system(copystring.String());
 			}
-			
+			break;
 		}
-		break;
-		
 		case B_SIMPLE_DATA:  //someone dropped something on us
 		{
 			//(new BAlert("Niue", "Drop", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 			be_app->PostMessage(msg);
+			break;
 		}
-		break;
-		
 	}
-
 }
 
 
-entry_ref* listview::FindItem()
+entry_ref *
+listview::FindItem()
 {
 //	char		string[512];
 	int32		index;
@@ -435,34 +399,33 @@ entry_ref* listview::FindItem()
 //	status_t	result;
 	TListItem	*item;
 	
-			index = fList->CurrentSelection();
-			item = dynamic_cast<TListItem *>(fList->ItemAt(index));
-			if (item)
-				{
-					ref = item->Ref();
-					
-					if (ref) 
-					{
-						return(ref);
-					}
-				}
+	index = fList->CurrentSelection();
+	item = dynamic_cast<TListItem *>(fList->ItemAt(index));
+	if (item)
+	{
+		ref = item->Ref();
+		if (ref) 
+			return(ref);
+	}
+	return NULL;
 }
 
-void listview::SelectByName(const char *name)
-{
 
+void
+listview::SelectByName(const char *name)
+{
 	for(int i = 0; i < fList->CountItems(); i++)
 	{
 		char *listname = dynamic_cast<TListItem*>(fList->ItemAt(i))->GetName(); 
-		if(strcmp(name, listname) == 0)
-		{
+		if (strcmp(name, listname) == 0)
 			fList->Select(i);
-		}
 	}		
 	
 }
 
-void listview::BuildList(entry_ref ref)
+
+void
+listview::BuildList(entry_ref ref)
 {
 	startref = ref;
 	
@@ -472,97 +435,110 @@ void listview::BuildList(entry_ref ref)
 	fList->MakeEmpty();
 	
 	//seperators
-	BListItem* seperator;
+	BListItem *seperator;
 	fList->AddItem(new TListItem("Source files:"));
 	fList->AddItem(seperator = new TListItem(" "));
 	fList->AddItem(new TListItem("Resources:"));
-
-		
+	
 	// and build the list
 	dir.SetTo(&ref);	
 	
-	int count;
-	
+//	int count;
 	while (dir.GetNextEntry(&entry, true) == B_NO_ERROR) 
-			{
-				if (entry.IsFile())
-					{
-						BNode node(&entry);
-						BNodeInfo nodeInfo(&node);
-						
-						char type[256];
-						nodeInfo.GetType(type);
-						BString t;
-						t << type;
-						
-						if (t == "text/x-source-code")
-						{
-							fList->AddItem(new TListItem(&entry, true), fList->IndexOf(seperator));
-						}
-						else
-						{
-							fList->AddItem(new TListItem(&entry, false));
-						}
-						
-					}
-			}
+	{
+		if (entry.IsFile())
+		{
+			BNode node(&entry);
+			BNodeInfo nodeInfo(&node);
+			
+			char type[256];
+			nodeInfo.GetType(type);
+			BString t;
+			t << type;
+			
+			if (t == "text/x-source-code")
+				fList->AddItem(new TListItem(&entry, true),
+								fList->IndexOf(seperator));
+			else
+				fList->AddItem(new TListItem(&entry, false));
+		}
+	}
 			
 	UpdateList(NULL,false);
-			
 }
 
-void listview::UpdateList(char *buffname, bool need_save)
+
+void
+listview::UpdateList(char *buffname, bool need_save)
 {
 //	(new BAlert("Niue", "Updating..", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 
 	BString string, newstring;
 
 	for(int i=0; i < fList->CountItems(); i++)
+	{
+		string = buffname;
+		TListItem *item = dynamic_cast<TListItem *>(fList->ItemAt(i));
+					
+		if(item->is_source == true)
 		{
-			string = buffname;
-			TListItem *item = dynamic_cast<TListItem *>(fList->ItemAt(i));
-						
-			if(item->is_source == true)
+			newstring = item->GetName();
+
+			Window()->Lock();			
+			if(string == newstring)
 			{
-				newstring = item->GetName();
-	
-					Window()->Lock();			
-				if(string == newstring)
+
+				if(need_save)
 				{
-	
-					if(need_save)
-					{
-//						(new BAlert("Niue", "Updating.., need save", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
-						item->save = false;
-//						item->fIcon= NULL;
-						item->DrawItem(this->fList,BRect(0,(i*42),item->Width(), item->Height()+2), true);
-//						item->Update(this->fList, be_plain_font);
-					}
-					else
-					{
-//						(new BAlert("Niue", "Updating.., no need save", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
-						item->save = true;
-//						item->fIcon= NULL;
-						item->DrawItem(this->fList,BRect(0,(i*42),item->Width(), item->Height()+2), true);
-//						item->Update(this->fList, be_plain_font);
-					}
-					fList->Invalidate();
+//					(new BAlert("Niue", "Updating.., need save", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
+					item->save = false;
+//					item->fIcon= NULL;
+					item->DrawItem(this->fList,BRect(0,(i*42),item->Width(), item->Height()+2), true);
+//					item->Update(this->fList, be_plain_font);
 				}
-	
-//					BuildList(startref);
-					Window()->Unlock();
+				else
+				{
+//					(new BAlert("Niue", "Updating.., no need save", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
+					item->save = true;
+//					item->fIcon= NULL;
+					item->DrawItem(this->fList,BRect(0,(i*42),item->Width(), item->Height()+2), true);
+//					item->Update(this->fList, be_plain_font);
+				}
+				fList->Invalidate();
 			}
-			else
-			{
-				item->save = true;
-			}
-		}	
+			
+//				BuildList(startref);
+				Window()->Unlock();
+		}
+		else
+			item->save = true;
+	}	
 }
 
 
+void
+listview::AttachedToWindow()
+{
+	//make sure we get our own messages
+	fList->SetTarget(this);
+
+	//do scrollbar math
+	int32 items = fList->CountItems();
+	float listheight = items * 21 - 200;
+
+	BScrollBar *pBar = WorkScroll->ScrollBar(B_VERTICAL);
+	if (pBar)
+		pBar->SetRange(0, listheight);
+}
+
+listview::~listview()
+{
+}
+
 
 RocketView::RocketView(BRect rect)
-				:BListView(rect, "list_view", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL, B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS)
+	:	BListView(rect, "list_view", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL,
+				B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS)
 {
 	
 }
@@ -570,17 +546,20 @@ RocketView::RocketView(BRect rect)
 
 RocketView::~RocketView()
 {
-	int32		index = 0;
-	TListItem	*item;
-
-	while ((item = dynamic_cast<TListItem *>(ItemAt(index++))) != NULL) 
+	int32 index = 0;
+	TListItem *item;
+	
+	item = dynamic_cast<TListItem *>(ItemAt(index++));
+	while (item != NULL) 
 	{
 		delete item;
+		item = dynamic_cast<TListItem *>(ItemAt(index++));
 	}
 }
 
 
-void RocketView::AttachedToWindow()
+void
+RocketView::AttachedToWindow()
 {
 	SetInvocationMessage(new BMessage(ITEM_MENU_INVOKED_MSG));
 	SetSelectionMessage(new BMessage(ITEM_MENU_SELECTED_MSG));
@@ -588,34 +567,47 @@ void RocketView::AttachedToWindow()
 	
 	//create left-click popup menu
 	// build menu
-	BMenuItem* item;
+//	BMenuItem* item;
 	
 	mnuLeft = new BPopUpMenu("context menu");
 	mnuLeft->SetRadioMode(false);
 	mnuLeft->AddItem(mnuMime = new BMenu("Mark as..."));
-	mnuMime->AddItem(item = new BMenuItem("Sourcecode", new BMessage(MNU_LEFT_SET_SOURCE)));
-	mnuMime->AddItem(item = new BMenuItem("Makefile", new BMessage(MNU_LEFT_SET_MAKEFILE)));
-	mnuMime->AddItem(item = new BMenuItem("Resource", new BMessage(MNU_LEFT_SET_RESOURCE)));
+	mnuMime->AddItem(new BMenuItem("Sourcecode",
+									new BMessage(MNU_LEFT_SET_SOURCE)));
+	mnuMime->AddItem(new BMenuItem("Makefile",
+									new BMessage(MNU_LEFT_SET_MAKEFILE)));
+	mnuMime->AddItem(new BMenuItem("Resource",
+									new BMessage(MNU_LEFT_SET_RESOURCE)));
 	mnuMime->AddSeparatorItem();
-	mnuMime->AddItem(item = new BMenuItem("Text", new BMessage(MNU_LEFT_SET_TEXT)));
-	mnuMime->AddItem(item = new BMenuItem("Image", new BMessage(MNU_LEFT_SET_IMAGE)));
-	mnuMime->AddItem(item = new BMenuItem("Audio", new BMessage(MNU_LEFT_SET_AUDIO)));
-	mnuMime->AddItem(item = new BMenuItem("Video", new BMessage(MNU_LEFT_SET_VIDEO)));
-	mnuMime->AddItem(item = new BMenuItem("Application", new BMessage(MNU_LEFT_SET_APP)));
-	mnuMime->AddItem(item = new BMenuItem("Archive", new BMessage(MNU_LEFT_SET_ARCHIVE)));
+	mnuMime->AddItem(new BMenuItem("Text", new BMessage(MNU_LEFT_SET_TEXT)));
+	mnuMime->AddItem(new BMenuItem("Image", new BMessage(MNU_LEFT_SET_IMAGE)));
+	mnuMime->AddItem(new BMenuItem("Audio", new BMessage(MNU_LEFT_SET_AUDIO)));
+	mnuMime->AddItem(new BMenuItem("Video", new BMessage(MNU_LEFT_SET_VIDEO)));
+	mnuMime->AddItem(new BMenuItem("Application",
+									new BMessage(MNU_LEFT_SET_APP)));
+	mnuMime->AddItem(new BMenuItem("Archive",
+									new BMessage(MNU_LEFT_SET_ARCHIVE)));
 	
 //	item->SetEnabled(false);
 	mnuLeft->AddSeparatorItem();
-	mnuLeft->AddItem(item = new BMenuItem("Open with Tracker", new BMessage(MNU_LEFT_OPEN_MSG)));
-	mnuLeft->AddItem(item = new BMenuItem("Get info", new BMessage(MNU_LEFT_INFO_MSG)));
-	mnuLeft->AddItem(item = new BMenuItem("Edit name", new BMessage(MNU_LEFT_NAME_MSG)));
-	mnuLeft->AddItem(item = new BMenuItem("Duplicate", new BMessage(MNU_LEFT_DUPLICATE_MSG)));
-	mnuLeft->AddItem(item = new BMenuItem("Remove from project", new BMessage(MNU_LEFT_TRASH_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Open with Tracker",
+									new BMessage(MNU_LEFT_OPEN_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Get info",
+									new BMessage(MNU_LEFT_INFO_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Edit name",
+									new BMessage(MNU_LEFT_NAME_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Duplicate",
+									new BMessage(MNU_LEFT_DUPLICATE_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Remove from project",
+									new BMessage(MNU_LEFT_TRASH_MSG)));
 	mnuLeft->AddSeparatorItem();
-	mnuLeft->AddItem(item = new BMenuItem("Copy to...", new BMessage(MNU_LEFT_COPY_MSG)));
-	mnuLeft->AddItem(item = new BMenuItem("Move to...", new BMessage(MNU_LEFT_MOVE_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Copy to…",
+									new BMessage(MNU_LEFT_COPY_MSG)));
+	mnuLeft->AddItem(new BMenuItem("Move to…",
+									new BMessage(MNU_LEFT_MOVE_MSG)));
 	mnuLeft->AddSeparatorItem();
-	mnuLeft->AddItem(item = new BMenuItem("View in tracker", new BMessage(MNU_LEFT_TRACKER_MSG)));
+	mnuLeft->AddItem(new BMenuItem("View in tracker",
+									new BMessage(MNU_LEFT_TRACKER_MSG)));
 	
 	
 	// set window as target so we get the message
@@ -623,35 +615,15 @@ void RocketView::AttachedToWindow()
 	mnuMime->SetTargetForItems(this);
 }
 
-void listview::AttachedToWindow()
+
+void
+RocketView::MouseDown(BPoint where)
 {
-	//make sure we get our own messages
-fList->SetTarget(this);
-
-//do scrollbar math
-int32 items = fList->CountItems();
-float listheight = items * 21 - 200;
-
-BScrollBar *pBar = WorkScroll->ScrollBar(B_VERTICAL);
-	if (pBar)
-	{
-	pBar->SetRange(0, listheight);
-	}
-}
-
-listview::~listview()
-{
-
-}
-
-
-void RocketView::MouseDown(BPoint where)
-{
-	//focus the list for scrolling
+	// focus the list for scrolling
 	MakeFocus(true);	
 	
-	uint32		buttons;
-
+	uint32 buttons;
+	
 	// retrieve the button state from the MouseDown message
 	if (Window()->CurrentMessage()->FindInt32("buttons", (int32 *)&buttons) == B_NO_ERROR) 
 	{
@@ -663,7 +635,6 @@ void RocketView::MouseDown(BPoint where)
 			// if clicked with second mouse button, let's do a context-sensitive menu
 			if (buttons & B_SECONDARY_MOUSE_BUTTON) 
 			{
-				
 				BPoint	point = where;
 				ConvertToScreen(&point);
 				// select this item
@@ -679,9 +650,7 @@ void RocketView::MouseDown(BPoint where)
 				index = CurrentSelection();
 				item = dynamic_cast<TListItem *>(ItemAt(index));
 				if (item)
-					{
-						ref = item->Ref();
-					}
+					ref = item->Ref();
   
 				BNode node(ref);
 				BNodeInfo nodeInfo(&node);
@@ -691,54 +660,47 @@ void RocketView::MouseDown(BPoint where)
 				t << type;
 /*				
 				if (t == "text/x-source-code")
-				{
 					mnuLeft->ItemAt(0)->SetEnabled(false);
-				}
 				else
-				{
 					mnuLeft->ItemAt(0)->SetEnabled(true);
-				}
 */				
 				mnuLeft->Go(point, true,true,(BRect(point.x,point.y,point.x + 1,point.y + 1)),true);
 				return;
 				
 			}
-			
-			// if clicked with primary mouse button
 			else if (buttons & B_PRIMARY_MOUSE_BUTTON) 
 			{
 				if (CurrentSelection() == item)
-				{
 					Invoke();
-				}
 				else
-				{
 					Select(item);
-				}
-				 
 			}
 			 
 		}
 	}
 }
 
-void RocketView::Draw(BRect where)
+
+void
+RocketView::Draw(BRect where)
 {
 	// intersection of the view and update rect
 	BRect	r = Bounds() & where;
 
 	// if rect is valid, fill rect with our background color
-	if (r.IsValid()) {
+	if (r.IsValid())
+	{
 		SetHighColor(white);
 		FillRect(r);
 	}
-
+	
 	// draw all items
 	BListView::Draw(where);
 }
 
+
 TListItem::TListItem(BEntry *entry, bool source)
-		  :BListItem()
+	:	BListItem()
 {
 	BNode		node;
 	BNodeInfo	node_info;
@@ -772,19 +734,19 @@ TListItem::TListItem(BEntry *entry, bool source)
 	super = false;
 }
 
-TListItem::TListItem(const char* name)
-		  :BListItem()
-{
-		is_source  = false;
-		//no icon
-		fIcon = NULL; 
-		// set name
-		strcpy(fName, name); 
-		//and looks
-		super = true;
-		save = true;
-		SetHeight(kDEFAULT_ITEM_HEIGHT);
 
+TListItem::TListItem(const char* name)
+	:	BListItem()
+{
+	is_source  = false;
+	//no icon
+	fIcon = NULL; 
+	// set name
+	strcpy(fName, name); 
+	//and looks
+	super = true;
+	save = true;
+	SetHeight(kDEFAULT_ITEM_HEIGHT);
 }
 
 
@@ -793,7 +755,9 @@ TListItem::~TListItem()
 	delete fIcon;
 }
 
-void TListItem::DrawItem(BView *view, BRect rect, bool)
+
+void
+TListItem::DrawItem(BView *view, BRect rect, bool)
 {	
 	float		offset = 10;
 	BFont		font = be_plain_font;
@@ -826,18 +790,12 @@ void TListItem::DrawItem(BView *view, BRect rect, bool)
 
 	// set text color
 	if(IsEnabled())
-	{
 		view->SetHighColor(ui_color(B_MENU_ITEM_TEXT_COLOR));
-	}
 	else
-	{
 		view->SetHighColor(grey);
-	}			 
 					 
 	if(!save)
-	{
-		view->SetHighColor(red);
-	}
+		view->SetHighColor(blue);
 	
 	if(super)
 	{
@@ -856,29 +814,24 @@ void TListItem::DrawItem(BView *view, BRect rect, bool)
 	}
 	
 	// position pen
-	view->MovePenTo(offset,
-		rect.top + ((rect.Height() - (finfo.ascent + finfo.descent + finfo.leading)) / 2) +
+	view->MovePenTo(offset, rect.top + ((rect.Height() - 
+										(finfo.ascent + finfo.descent +
+										finfo.leading)) / 2) +
 					(finfo.ascent + finfo.descent) - 2);
 	// and draw label
 	view->DrawString(fName);
 }
 
 
-
 void 
 TListItem::Update(BView *owner, const BFont *finfo)
 {
-	
 	// we need to override the update method so we can make sure are
 	// list item size doesn't change
 	BListItem::Update(owner, finfo);
-	if ((fIcon) && (Height() < fIcon->Bounds().Height() + kITEM_MARGIN)) {
+	if ((fIcon) && (Height() < fIcon->Bounds().Height() + kITEM_MARGIN))
 		SetHeight(fIcon->Bounds().Height() + kITEM_MARGIN);
-	}
 	else
 		SetHeight(kDEFAULT_ITEM_HEIGHT);
-	
 }
-
-
 

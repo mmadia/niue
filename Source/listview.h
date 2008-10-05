@@ -18,9 +18,6 @@
 	advised of the possibility of such damage. 
 
 *///-----------------------------------------------------------------------------
-
-
-
 #ifndef LISTVIEW_H
 #define LISTVIEW_H
 
@@ -70,35 +67,31 @@
 #define MNU_LEFT_SET_APP				'MAAP'
 #define MNU_LEFT_SET_ARCHIVE			'MAAR'
 
-
-
-
-
 class RocketView;
+
 class listview : public BView
 {
-	public:
-		listview(BRect frame, char *name);
-		~listview();
-		
-		virtual void 			MessageReceived(BMessage*);
-		virtual void 			AttachedToWindow();
-		virtual void			SelectByName(const char *name);
-		void 					BuildList(entry_ref ref);
-		void					UpdateList(char *buffname,bool saved);
-		entry_ref*				FindItem();
-		RocketView*				fList;
-		
-	private:
-		
-		BScrollView*			WorkScroll;
-		BDirectory				dir;
-		BEntry					entry;
-		BFilePanel*				CopyPanel;
-		BListItem*				source;
-		BListItem*				res;
-		entry_ref				startref;
-		
+public:
+	listview(BRect frame, char *name);
+	~listview();
+	
+	virtual void 			MessageReceived(BMessage*);
+	virtual void 			AttachedToWindow();
+	virtual void			SelectByName(const char *name);
+	void 					BuildList(entry_ref ref);
+	void					UpdateList(char *buffname,bool saved);
+	entry_ref*				FindItem();
+	RocketView*				fList;
+	
+private:
+	
+	BScrollView*			WorkScroll;
+	BDirectory				dir;
+	BEntry					entry;
+	BFilePanel*				CopyPanel;
+	BListItem*				source;
+	BListItem*				res;
+	entry_ref				startref;
 };
 
 //--------------------------------------------------------------------
