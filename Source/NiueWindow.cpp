@@ -207,7 +207,7 @@ NiueWindow::NiueWindow(BRect frame,Buff *bb)
 							B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP,B_ITEMS_IN_ROW,TRUE);
 	CreateMenus(topmenu);
 	AddChild(topmenu);
-
+	
 	MyMetrics();
 	
 	scbv = new BSBar(rsbv,"ScrV",fDrawPort,0,100,B_VERTICAL);
@@ -220,8 +220,6 @@ NiueWindow::NiueWindow(BRect frame,Buff *bb)
 	
 	fListView = new listview(rlist, "fListView");
 	
-	fControlView = new ControlView(rcontrol, "fControlView");
-	
 	fOutputView = new OutputView(routput, "vwOuput");
 	
 	fHintView = new HintView(rhint, "fHintView");
@@ -230,7 +228,6 @@ NiueWindow::NiueWindow(BRect frame,Buff *bb)
 	
 	//set objects
 	fListView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	fControlView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	fHintView->SetViewColor(blueish);
 	fFillView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	mycurs = ((wincnt-1)&3)*4 + 140;
@@ -247,7 +244,6 @@ NiueWindow::NiueWindow(BRect frame,Buff *bb)
 	AddChild(fHMover);
 	AddChild(fVMover);
 	AddChild(fMapView);
-	AddChild(fControlView);
 	AddChild(scbh);
 	AddChild(scbv);
 	AddChild(fListView);
@@ -414,8 +410,7 @@ NiueWindow::MyMetrics()
 	
 	rmover = BRect(vsplit-6,mbh + 1,vsplit-1,fFrame.Height());
 	hmover = BRect(vsplit-1,ysplit + 1,fFrame.Width(),ysplit + 6);
-	rlist = BRect(0,mbh,vsplit-7,hsplit);
-	rcontrol = BRect(0,hsplit + 1,vsplit-7,fFrame.Height());
+	rlist = BRect(0,mbh,vsplit-7,fFrame.Height());
 	rmyview = BRect(vsplit,mbh + 2.0,bx,ysplit-sh-B_H_SCROLL_BAR_HEIGHT-1);    //BMapView
 	routput = BRect(vsplit,ysplit + 7,xsplit,fFrame.Height());
 	rhint = BRect(xsplit,ysplit + 7,fFrame.Width(),fFrame.Height());
@@ -519,11 +514,6 @@ NiueWindow::LoadDir(entry_ref dirref)
 	mproj->ItemAt(8)->SetEnabled(true);
 	mwin->ItemAt(0)->SetEnabled(true);
 	mwin->ItemAt(1)->SetEnabled(true);
-
-	//buttons
-	fControlView->btnMake->SetEnabled(true);
-	fControlView->btnMakeClean->SetEnabled(true);
-	fControlView->btnRun->SetEnabled(true);
 
 	//empty outputview
 	fOutputView->ClearText();
@@ -868,7 +858,6 @@ NiueWindow::MessageReceived(BMessage *msg)
 					BPoint p = ConvertFromScreen(BPoint(coord,0));
 								
 					//left views
-					fControlView->ResizeTo(p.x,fControlView->Frame().Height());
 					fListView->ResizeTo(p.x,fListView->Frame().Height());
 							
 					//right views
@@ -1463,11 +1452,16 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case A_INSERT_HINT:
 		{
-			msg->AddString("hint", dynamic_cast<BStringItem*>(fHintView->lstHints->ItemAt(fHintView->lstHints->CurrentSelection()))->Text());
-			cb->PostMessage(msg);
-			
-			fHintView->lstHints->MakeEmpty();
-			fMapView->MakeFocus(true);
+			int32 selection = fHintView->lstHints->CurrentSelection();
+			BStringItem *item = dynamic_cast<BStringItem*>(fHintView->lstHints->ItemAt(selection));
+			if (item)
+			{
+				msg->AddString("hint", item->Text());
+				cb->PostMessage(msg);
+			 
+				fHintView->lstHints->MakeEmpty();
+				fMapView->MakeFocus(true);
+			}
 			break;
 		}
 		case A_GEN_MAKEFILE:

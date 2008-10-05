@@ -32,7 +32,6 @@
 	
 #include "mover.h"
 #include "listview.h"
-#include "controlview.h"
 #include "openwindow.h"
 #include "IconMenu.h"
 #include "outputview.h"
@@ -82,7 +81,6 @@ public:
 	Mover*			fVMover;
 	Mover*			fHMover;
 	listview*		fListView;
-	ControlView*	fControlView;
 	OutputView*		fOutputView;
 	BRect			fFrame;
 	BView*			fFillView;
@@ -132,7 +130,7 @@ private:
 	void            DoMenuFontName();
 	void            DoMenuFontSize();
 
-	BRect       	rmyview,rssv,rsbh,rsbv,rmover,rlist,rcontrol, hmover, routput, rfill, rhint;
+	BRect       	rmyview,rssv,rsbh,rsbv,rmover,rlist, hmover, routput, rfill, rhint;
 	
 	int 			vsplit, hsplit, ysplit, xsplit;  //= vert mover, bottom filelist, bottom sourceview, right output
 	
