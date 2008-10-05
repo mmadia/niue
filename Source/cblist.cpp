@@ -19,143 +19,201 @@
 	advised of the possibility of such damage. 
 
 *///-----------------------------------------------------------------------------
-
-
-
 #include <malloc.h>
 #include <stdio.h>
 
 #include <OS.h>
-
 #include "cblist.h"
 
-#ifndef NULL
-	#define NULL    0L
-#endif
-
-#ifndef TRUE
-	#define TRUE 1
-	#define FALSE 0
-#endif
-
-
-
-CList::CList(int num){
-	num=4;
-	max=num;
-	if (max){
-		data=(long*)malloc(sizeof(long) * max);
-//		printf("%x\n",data);
-	}else{
-		data=NULL;
-	}
-	Reset();
-}
-
-CList::~CList(){
-	free(data);
-	data=NULL;
-}
-
-CList& CList::operator= (const CList &t)
+CList::CList(int num)
 {
-	int i,mx=t.Num();
-	Reset();
-	for (i=0;i<mx;i++){
-		Add(t[i]);
+	num = 4;
+	max = num;
+	if (max)
+	{
+		data = (long*)malloc(sizeof(long) * max);
+//		printf("%x\n",data);
 	}
+	else
+		data = NULL;
+	Reset();
+}
+
+
+CList::~CList()
+{
+	free(data);
+	data = NULL;
+}
+
+
+CList &
+CList::operator=(const CList &t)
+{
+	int i, mx = t.Num();
+	Reset();
+	
+	for (i = 0; i < mx; i++)
+		Add(t[i]);
 	return *this;
 }
 
-void CList::Reset(){
-	mycount=0;
+
+void
+CList::Reset()
+{
+	mycount = 0;
 }
 
-long CList::Item(int idx) const{
-	if (idx<0||idx>=mycount) return 0;
+
+long
+CList::Item(int idx) const
+{
+	if (idx < 0 || idx >= mycount)
+		return 0;
 	return data[idx];
 }
 
- void CList::CheckMax(long nucount){
-	if (mycount>=max){
+
+void
+CList::CheckMax(long nucount)
+{
+	if (mycount >= max)
+	{
 		printf("SERIOUS PROBLEMS IN CB_LIST!!\n");
-		printf("0x%x :%d,%d,%d\n",data,mycount,nucount,max);
+		printf("0x%p :%ld,%ld,%ld\n",data,mycount,nucount,max);
 	}
-	if (nucount>=max){
-		int omax=max;
-		if (!omax)max=4;
-		while (nucount>=max){
-			max=max*2;
-		}
+	
+	if (nucount >= max)
+	{
+		int omax = max;
+		if (!omax)
+			max = 4;
+		while (nucount >= max)
+			max *= 2;
 
-//        printf("data moved, was 0x%x (%d,%d,%d,%d)\n",data,mycount,nucount,max,omax);
+//		printf("data moved, was 0x%x (%d,%d,%d,%d)\n",data,mycount,nucount,max,omax);
 		data=(long*)realloc(data,sizeof(long) * max);
-//        printf("now 0x%x(%d)\n",data,find_thread(0));
+//		printf("now 0x%x(%d)\n",data,find_thread(0));
 	}
 }
 
-void   CList::Add(long vv,long index){
-	if (index<0)return;
 
-	CheckMax(index+2);
-	while (mycount<index){
-		data[mycount++]=0;
-	}
+void
+CList::Add(long vv,long index)
+{
+	if (index < 0)
+		return;
 
-	CheckMax(mycount+1);
+	CheckMax(index + 2);
+	while (mycount<index)
+		data[mycount++] = 0;
+
+	CheckMax(mycount + 1);
 	mycount++;
-	for (int i=mycount;i>index;i--) data[i]=data[i-1];
-	data[index]=vv;
-	return;
+	for (int i = mycount; i > index; i--)
+		data[i] = data[i - 1];
+	data[index] = vv;
 }
 
-void CList::RemIndex(long index){
-	if (index>=0){
-		for (int i=index;i<mycount;i++){
-			data[i]=data[i+1];
-		}
-		if (index<mycount){mycount--;}
+
+void
+CList::RemIndex(long index)
+{
+	if (index >= 0)
+	{
+		for (int i = index; i < mycount; i++)
+			data[i] = data[i + 1];
+		if (index < mycount)
+			mycount--;
 	}
-	return;
 }
 
-void CList::SwapWith(long val,long index){
-	while (mycount<=index){
+
+void
+CList::SwapWith(long val,long index)
+{
+	while (mycount <= index)
 		Add((long)NULL,mycount);
-	}
-	if (index>=0){
-		data[index]=val;
-	}
+	if (index >= 0)
+		data[index] = val;
 }
 
-bool CList::operator<= (long h) const{
-	for (int i=0;i<mycount;i++){
-		if (data[i]==h) return TRUE;
-	}
+
+bool
+CList::operator<=(long h) const
+{
+	for (int i=0;i<mycount;i++)
+		if (data[i] == h)
+			return TRUE;
 	return FALSE;
 }
 
-int CList::IndexOf (long h) const{
-	for (int i=0;i<mycount;i++){
-		if (data[i]==h) return i;
-	}
+
+int
+CList::IndexOf (long h) const
+{
+	for (int i = 0; i < mycount; i++)
+		if (data[i] == h)
+			return i;
 	return -1;
 }
 
-//-----------------------------------
 
-void CList::AddF(float vv,long index){Add(*(long*)&vv,index);}
-void CList::SwapWithF(float vv,long index){SwapWith(*(long*)&vv,index);}
-float CList::ItemF(int idx) const{
-	if (idx<0||idx>=mycount) return 0.0;
-	return *(float*)(data+idx);
+void
+CList::AddF(float vv,long index)
+{
+	Add(*(long*)&vv,index);
 }
 
 
-void *CList::ItemV(int idx)const{return (void*)Item(idx);}
-void CList::Add(const void *value,long index){Add((long)value,index);}
-int CList::IndexOf(const void *value) const{return IndexOf((long)value);}
-void CList::SwapWith(const void *vv,long index){SwapWith((long)vv,index);}
-bool CList::operator<=(const void* value) const{return *this<=(void*)value;}
+void
+CList::SwapWithF(float vv,long index)
+{
+	SwapWith(*(long*)&vv,index);
+}
 
-//-------------------------------------
+
+float
+CList::ItemF(int idx) const
+{
+	if (idx < 0 || idx >= mycount)
+		return 0.0;
+	return *(float*)(data + idx);
+}
+
+
+void *
+CList::ItemV(int idx) const
+{
+	return (void*)Item(idx);
+}
+
+
+void
+CList::Add(const void *value,long index)
+{
+	Add((long)value,index);
+}
+
+
+int
+CList::IndexOf(const void *value) const
+{
+	return IndexOf((long)value);
+}
+
+
+void
+CList::SwapWith(const void *vv,long index)
+{
+	SwapWith((long)vv,index);
+}
+
+
+bool
+CList::operator<=(const void* value) const
+{
+	return *this <= (void*)value;
+}
+

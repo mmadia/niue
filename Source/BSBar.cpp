@@ -26,50 +26,64 @@
 #include "BSBar.h"
 #include "BMapView.h"
 
-BSBar::BSBar(BRect frame, const char *name,port_id drawport, long min, long max, orientation posture)
-	:BScrollBar(frame,name,NULL,min,max,posture)
+BSBar::BSBar(BRect frame, const char *name,port_id drawport, long min, long max,
+			orientation posture)
+	:	BScrollBar(frame,name,NULL,min,max,posture)
 {
-	lastindex=NULL;
-	bflist=new CList();
-	valist=new CList();
-	drprt=drawport;
+	fLastIndex=NULL;
+	fIndexList=new CList();
+	fValueList=new CList();
+	fDrawPort=drawport;
 }
 
-BSBar::~BSBar(){
-	delete bflist;
-	delete valist;
+
+BSBar::~BSBar()
+{
+	delete fIndexList;
+	delete fValueList;
 }
 
-void BSBar::Capture(float mult){
+
+void
+BSBar::Capture(float mult)
+{
 	long    tt;
 
-	if (lastindex){
-		tt=bflist->IndexOf(lastindex);
-		if (tt<0){
+	if (fLastIndex)
+	{
+		tt=fIndexList->IndexOf(fLastIndex);
+		if (tt<0)
 			printf("error in BSBar->ChangeBuff()\n");
-		}else{
-			valist->SwapWithF(Value()/mult,tt);
-		}
+		else
+			fValueList->SwapWithF(Value()/mult,tt);
 	}
 }
 
-void BSBar::ChangeIndex(float mult,void *newindex,float def){
+
+void
+BSBar::ChangeIndex(float mult,void *newindex,float def)
+{
 	long    tt;
 
-	tt=bflist->IndexOf(newindex);
-	lastindex=newindex;
-	if (tt<0){
-		bflist->Add(lastindex);
-		valist->AddF(def);
+	tt=fIndexList->IndexOf(newindex);
+	fLastIndex=newindex;
+	if (tt<0)
+	{
+		fIndexList->Add(fLastIndex);
+		fValueList->AddF(def);
 		SetValue(def);
-	}else{
-		SetValue(valist->ItemF(tt)*mult);
 	}
+	else
+		SetValue(fValueList->ItemF(tt)*mult);
 }
 
-void BSBar::ValueChanged(float vv){
-	if (lastv!=vv){
-		write_port(drprt,SCROLLBAR_MOVE,NULL,0);
-		lastv=vv;
+
+void
+BSBar::ValueChanged(float vv)
+{
+	if (fLastValue!=vv)
+	{
+		write_port(fDrawPort,SCROLLBAR_MOVE,NULL,0);
+		fLastValue=vv;
 	}
 }

@@ -25,10 +25,8 @@
 #include "openwindow.h"
 //#include "niue.h"
 
-
-
-openwindow::openwindow() :
-	BWindow(BRect(0,0,300,400), "Niue - Browse projects", B_TITLED_WINDOW,B_WILL_DRAW)
+OpenWindow::OpenWindow()
+	:	BWindow(BRect(0,0,300,400), "Niue - Browse projects", B_TITLED_WINDOW,B_WILL_DRAW)
 {
 	CenterWindow();
 		
@@ -40,19 +38,24 @@ openwindow::openwindow() :
 	
 	//add objects
 	AddChild(vwMain);
-	
-
 }
+
 
 MainView::MainView(BRect rect, char *name) :
 	BView(rect, name, B_FOLLOW_ALL, B_WILL_DRAW)
 {
-
 	int32 hsplit = 285;
 
-	txtPath = new BTextControl(BRect(10,7,rect.Width()-75,25), "txtPath", "Look for projects in:","/boot/home", new BMessage(GO_MSG), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
-	btnGo = new BButton(BRect(rect.Width()-70, 5, rect.Width()-7, 25), "btnGo", "Search", new BMessage(GO_MSG), B_FOLLOW_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
-	btnOpen = new BButton(BRect(rect.Width()-75,rect.Height()-30,rect.Width()-10,rect.Height()-10), "btnOpen", "Open", new BMessage(OPEN_MSG), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM, B_WILL_DRAW | B_NAVIGABLE);
+	txtPath = new BTextControl(BRect(10,7,rect.Width()-75,25), "txtPath",\
+								"Look for projects in:","/boot/home", new BMessage(GO_MSG),
+								B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE);
+	btnGo = new BButton(BRect(rect.Width() - 70, 5, rect.Width() - 7, 25), "btnGo", "Search",
+								new BMessage(GO_MSG), B_FOLLOW_RIGHT | B_FOLLOW_TOP,
+								B_WILL_DRAW | B_NAVIGABLE);
+	btnOpen = new BButton(BRect(rect.Width() - 75,rect.Height() - 30,rect.Width() - 10,
+								rect.Height() - 10),
+						  "btnOpen", "Open", new BMessage(OPEN_MSG), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM,
+						  B_WILL_DRAW | B_NAVIGABLE);
 	btnCancel = new BButton(BRect(rect.Width()-150,rect.Height()-30,rect.Width()-85,rect.Height()-10), "btnCancel", "Cancel", new BMessage(CANCEL_MSG), B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM, B_WILL_DRAW | B_NAVIGABLE);
 	fList = new ProjectsView(BRect(10,35,rect.Width()-(B_V_SCROLL_BAR_WIDTH+10),hsplit));
 	WorkScroll = new BScrollView("WorkScroll", fList, B_FOLLOW_ALL, B_WILL_DRAW, false, true, B_PLAIN_BORDER);
@@ -63,7 +66,7 @@ MainView::MainView(BRect rect, char *name) :
 	txtPath->SetDivider(be_plain_font->StringWidth("Look for projects in: "));
 	SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	txtInfo->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	txtInfo->SetText("\n   ...Hit search to look for porjects");
+	txtInfo->SetText("\n   …Hit search to look for projects");
 	
 
 	AddChild(txtPath);
@@ -80,16 +83,21 @@ MainView::MainView(BRect rect, char *name) :
 	btnGo->MakeDefault(true);
 }
 
+
 MainView::~MainView()
 {
 }
 
-bool openwindow::QuitRequested()
+
+bool
+OpenWindow::QuitRequested()
 {
-	Quit();
+	return true;
 }
 
-void MainView::MessageReceived(BMessage* message)
+
+void
+MainView::MessageReceived(BMessage* message)
 {
 	
 	switch(message->what)
@@ -129,9 +137,9 @@ void MainView::MessageReceived(BMessage* message)
 
 
 
-void openwindow::CenterWindow()
+void
+OpenWindow::CenterWindow()
 {
-	
 	BScreen mScreen(B_MAIN_SCREEN_ID);
 	BRect screenRes, winBounds;
 	screenRes.Set((mScreen.Frame().left), (mScreen.Frame().top), (mScreen.Frame().right), (mScreen.Frame().bottom));
@@ -141,7 +149,9 @@ void openwindow::CenterWindow()
 	
 }
 
-void MainView::DisplayInfo()
+
+void
+MainView::DisplayInfo()
 {
 	
 	
@@ -162,7 +172,6 @@ void MainView::DisplayInfo()
 	{
 		try
 		{
-
 			item = dynamic_cast<pListItem *>(fList->ItemAt(index));
 			ref = item->Ref();
 			entry.SetTo(&ref, true);
@@ -185,7 +194,7 @@ void MainView::DisplayInfo()
 		}
 		catch(int)
 		{
-		txtInfo->SetText("Error loading file info");
+			txtInfo->SetText("Error loading file info");
 		}
 	}
 	
@@ -228,9 +237,8 @@ void MainView::SendMessage()
 void MainView::BuildList()
 {
 	
-	BWindow* barberWindow = new barberwindow("Please wait while Niue fetches your query");
+	BWindow* barberWindow = new BarberWindow("Searching…");
 	barberWindow->Show();
-	
 	
 	//let's first clear the list
 	fList->MakeEmpty();
@@ -287,35 +295,34 @@ void MainView::BuildList()
 	
 }
 
-void MainView::GetUserPath()
+
+void
+MainView::GetUserPath()
 {
-		//read the settings file
-		BPath prefspath;
-		
-		//find prefsfile
-		find_directory(B_USER_SETTINGS_DIRECTORY, &prefspath, false);
-		prefspath.Append("Niue/niue_prefs.browse");
-		
-		//create file
-		BFile prefsfile(prefspath.Path(), B_READ_ONLY);
-		if (prefsfile.IsReadable())
-		{
-			BMessage msg('PREF');
-			BString browsestring;
-			msg.Unflatten(&prefsfile);
-			if(msg.FindString("browse_path", &browsestring) != B_OK)
-			{
-				txtPath->SetText("/boot/home");
-			}
-			else
-			{
-				txtPath->SetText(browsestring.String());
-			}
-		}
+	//read the settings file
+	BPath prefspath;
+	
+	//find prefsfile
+	find_directory(B_USER_SETTINGS_DIRECTORY, &prefspath, false);
+	prefspath.Append("Niue/niue_prefs.browse");
+	
+	//create file
+	BFile prefsfile(prefspath.Path(), B_READ_ONLY);
+	if (prefsfile.IsReadable())
+	{
+		BMessage msg('PREF');
+		BString browsestring;
+		msg.Unflatten(&prefsfile);
+		if(msg.FindString("browse_path", &browsestring) != B_OK)
+			txtPath->SetText("/boot/home");
+		else
+			txtPath->SetText(browsestring.String());
+	}
 }
 
 
-void MainView::SaveUserPath()
+void
+MainView::SaveUserPath()
 {
 		//now let's save the search argument
 		BPath prefspath;
@@ -335,8 +342,29 @@ void MainView::SaveUserPath()
 		}
 }
 
+
+void 
+MainView::AttachedToWindow()
+{
+	fList->SetTarget(this);
+	btnOpen->SetTarget(this);
+	btnCancel->SetTarget(this);
+	txtPath->SetTarget(this);
+	btnGo->SetTarget(this);
+	
+	int32 items = fList->CountItems();
+	float listheight = items * DEFAULT_ITEM_HEIGHT; //	- 200;
+	
+	BScrollBar *pBar = WorkScroll->ScrollBar(B_VERTICAL);
+	
+	if (pBar)
+		pBar->SetRange(0, listheight);
+}
+
+
 ProjectsView::ProjectsView(BRect rect)
-				:BListView(rect, "list_view", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL, B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS)
+	:	BListView(rect, "list_view", B_SINGLE_SELECTION_LIST, B_FOLLOW_ALL,
+				B_WILL_DRAW | B_NAVIGABLE | B_FRAME_EVENTS)
 {
 }
 
@@ -344,11 +372,12 @@ ProjectsView::ProjectsView(BRect rect)
 ProjectsView::~ProjectsView()
 {
 	int32		index = 0;
-	pListItem	*item;
-
-	while ((item = dynamic_cast<pListItem *>(ItemAt(index++))) != NULL) 
+	
+	pListItem	*item = dynamic_cast<pListItem *>(ItemAt(index++));
+	while (item != NULL) 
 	{
 		delete item;
+		item = dynamic_cast<pListItem *>(ItemAt(index++));
 	}
 }
 
@@ -362,28 +391,8 @@ ProjectsView::AttachedToWindow()
 }
 
 
-void 
-MainView::AttachedToWindow()
-{
-fList->SetTarget(this);
-btnOpen->SetTarget(this);
-btnCancel->SetTarget(this);
-txtPath->SetTarget(this);
-btnGo->SetTarget(this);
-
-int32 items = fList->CountItems();
-float listheight = items * DEFAULT_ITEM_HEIGHT; //	- 200;
-
-BScrollBar *pBar = WorkScroll->ScrollBar(B_VERTICAL);
-	if (pBar)
-	{
-	pBar->SetRange(0, listheight);
-	}
-}
-
-
 pListItem::pListItem(BEntry *entry)
-		  :BListItem()
+	:	BListItem()
 {
 	BNode		node;
 	BNodeInfo	node_info;
@@ -428,7 +437,8 @@ pListItem::DrawItem(BView *view, BRect nrect, bool)
 	font_height	finfo;
 
 	// set background color
-	if (IsSelected()) {
+	if (IsSelected()) 
+	{
 		// fill color
 		view->SetHighColor(ui_color(B_MENU_SELECTION_BACKGROUND_COLOR));
 		// anti-alias color
@@ -443,10 +453,10 @@ pListItem::DrawItem(BView *view, BRect nrect, bool)
 	// fill item's rect
 	view->FillRect(nrect);
 //	view->FillRoundRect(nrect, 2, 2);   //was: FillRect(rect)
-
+	
 	//if selected do some pretifying
 	
-
+	
 	// if we have an icon, draw it
 	if (fIcon) 
 	{
@@ -458,13 +468,10 @@ pListItem::DrawItem(BView *view, BRect nrect, bool)
 	}
 	
 	if (IsSelected()) 
-	{
 		view->SetHighColor(ui_color(B_MENU_SELECTED_ITEM_TEXT_COLOR));
-	}
 	else
-	{
 		view->SetHighColor(ui_color(B_MENU_ITEM_TEXT_COLOR));
-	}
+	
 	// set up font
 	font.SetSize(10);
 	font.GetHeight(&finfo);
@@ -473,13 +480,12 @@ pListItem::DrawItem(BView *view, BRect nrect, bool)
 	// position pen
 	//view->MovePenTo(offset, nrect.top + 21);
 	
-	view->MovePenTo(offset,
-		nrect.top + ((nrect.Height() - (finfo.ascent + finfo.descent + finfo.leading)) / 2) +
-					(finfo.ascent + finfo.descent) - 2);
+	view->MovePenTo(offset,	nrect.top + ((nrect.Height() - 
+											(finfo.ascent + finfo.descent + finfo.leading)) / 2) +
+							(finfo.ascent + finfo.descent) - 2);
 	
 	// and draw label
 	view->DrawString(fName);
-	
 }
 
 
@@ -490,11 +496,7 @@ pListItem::Update(BView *owner, const BFont *finfo)
 	// list item size doesn't change
 	BListItem::Update(owner, finfo);
 	if ((fIcon) && (Height() < fIcon->Bounds().Height() + ITEM_MARGIN)) 
-	{
 		SetHeight(fIcon->Bounds().Height() + ITEM_MARGIN);
-	}
 	else
-	{
 		SetHeight(21);
-	}
 }

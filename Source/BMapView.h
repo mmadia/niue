@@ -21,113 +21,118 @@
 
 
 #ifndef BMAP_VIEW_H
-	#define BMAP_VIEW_H
+#define BMAP_VIEW_H
 
-	#include <View.h>
-	#include <Region.h>
+#include <View.h>
+#include <Region.h>
 
-	#include "UBuffer.h"
-	#include "actions.h"
-	#include "snippetmenu.h"
+#include "UBuffer.h"
+#include "actions.h"
+#include "snippetmenu.h"
 
-	class CList;
-	class NiueWindow;
-	class SMap;
-	class Buff;
-	class BSBar;
-	class ViewBase;
-	class WinStats;
+class CList;
+class NiueWindow;
+class SMap;
+class Buff;
+class BSBar;
+class ViewBase;
+class WinStats;
 
-	class BMapView : public BView {
+#define SCROLL          100
+#define SCROLLBAR_MOVE  160
 
-	public:
-						BMapView(NiueWindow *,Buff*,BRect frame, char *name,BSBar *s1,BSBar *s2,port_id pp);
-						virtual ~BMapView();
-		virtual void    Draw(BRect updateRect);
-		virtual void    MouseDown(BPoint where);
-		virtual void    MouseMoved(BPoint,uint32,const BMessage*);
-		virtual void    FrameResized(float new_width, float new_height);
-		virtual void    Pulse();
-		virtual void    KeyDown(const char *bytes, int32 numBytes);
-		virtual void	DoRightMenu(BPoint point);
-				bool	HasSelection();
+class BMapView : public BView
+{
+public:
+					BMapView(NiueWindow *,Buff*,BRect frame, char *name,BSBar *s1,BSBar *s2,port_id pp);
+	virtual ~BMapView();
+	virtual void    Draw(BRect updateRect);
+	virtual void    MouseDown(BPoint where);
+	virtual void    MouseMoved(BPoint,uint32,const BMessage*);
+	virtual void    FrameResized(float new_width, float new_height);
+	virtual void    Pulse();
+	virtual void    KeyDown(const char *bytes, int32 numBytes);
+	virtual void	DoRightMenu(BPoint point);
+			bool	HasSelection();
 
-		WinStats    *ws;
+			int32           DrawThread();
 
-		int32           DrawThread();
+			SMap        *PrepareBlit(BRect dest, BRect *src);
 
-		SMap        *PrepareBlit(BRect dest, BRect *src);
+			void            MyScrollTo(float x,float y);
+			void            MyScrollTo(int32 pos);
+			void            CleanScrollers();
+			void            FlickTo(float x,float y);
 
-		void            MyScrollTo(float x,float y);
-		void            MyScrollTo(int32 pos);
-		void            CleanScrollers();
-		void            FlickTo(float x,float y);
+			void            ChangeBuff(Buff *);
+			void		HalfCursor(const BRect &r);
+			void        HideCursor();
+			void        HideCursorNow();
+			void        PlaceCursor();
+			void        DrawCursor();
+			void		ChangeCursor(int32 newcursor);
 
-		void            ChangeBuff(Buff *);
-		void		HalfCursor(const BRect &r);
-		void        HideCursor();
-		void        HideCursorNow();
-		void        PlaceCursor();
-		void        DrawCursor();
-		void		ChangeCursor(int32 newcursor);
+			WinStats	*ws;
+			int32		targetnum;
+			float		fh,ffh;
+			Buff		*cb; //Current Buffer
+			BSBar		*scbv,*scbh;
+			BFont		myfont;
+			color_space	cspace;
+			ViewBase	*vb;
+			
+			float		tax,tay,vvx,vvy,pox,poy;		
 
-		int32		targetnum;
-		float           fh,ffh;
-		Buff            *cb; //Current Buffer
-		BSBar           *scbv,*scbh;
-		BFont           myfont;
-		color_space     cspace;
-		ViewBase    *vb;
+private:
+			BRect		bnds;
 		
-		float           tax,tay,vvx,vvy,pox,poy;		
-
-	private:
-		BRect   bnds;
-
-		float       tlx,tly,wid;
-		int32		ltop;
-
-		BRegion     ScreenClean;
-		BRegion     MyDirty;
-		void    MyDraw();
-
-		void            CleanScreen(BRect rr);
-
-		void            SeekMouse();
-		void            SeekCursor();
-		void            SeekScrollBar();
-
-		void            Closer(float &,float &vel,float dest,bigtime_t time);
-		void            DoKeyDown(const char *bytes, int32 key,int32 modifiers);
-		int32           Scribble(int32,int32,int32,int32,int32);
-
-		int32           cstat,sleeping;
-		int32           stx,sty;//for mouse-dragging
-
-		float           prate;
-
-		color_space uspace;
-		SMap           *smp1,*smp2;       //cached drawing
-		int32           lastsmp;
-		int32           lastshift;
-		int32            needscrolls;
-		int32            smx,smy;
-		int32            mouseb, button;
-		int32            lmx,lmy,lcx,lcy;
-
-		float           rpx,rpy;
-
-		bigtime_t       lastscroll,mynow;
-		BPoint          lastmouse;
-		float           lex,ley;
-		float           llx,lly;
+			float		tlx,tly,wid;
+			int32		ltop;
 		
-		snippetmenu*	mnuSnip;
-//		snippetwindow*	wdwSnip;
-	};
+			BRegion		ScreenClean;
+			BRegion		MyDirty;
+			void		MyDraw();
+		
+			void		CleanScreen(BRect rr);
+		
+			void		SeekMouse();
+			void		SeekCursor();
+			void		SeekScrollBar();
+		
+			void		Closer(float &,float &vel,float dest,bigtime_t time);
+			void		DoKeyDown(const char *bytes, int32 key,int32 modifiers);
+			int32		Scribble(int32,int32,int32,int32,int32);
+		
+			int32		cstat,sleeping;
+			int32		stx,sty;//for mouse-dragging
+		
+			float		prate;
+		
+			color_space	uspace;
+			SMap			*smp1,*smp2;       //cached drawing
+			int32			lastsmp,
+							lastshift,
+							needscrolls,
+							smx,
+							smy,
+							mouseb,
+							button,
+							lmx,
+							lmy,
+							lcx,
+							lcy;
+		
+			float			rpx,rpy;
+		
+			bigtime_t		lastscroll,mynow;
+			BPoint			lastmouse;
+			float			lex,ley;
+			float			llx,lly;
+			
+			snippetmenu		*mnuSnip;
+//			snippetwindow	*wdwSnip;
+};
 
-	#define SCROLL          100
-	#define SCROLLBAR_MOVE  160
 
 #endif //BMAPVIEW_H
 

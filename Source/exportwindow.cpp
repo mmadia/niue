@@ -83,12 +83,12 @@ exportwindow::exportwindow(BEntry proj_entry) :
 }
 
 
-
-
-bool exportwindow::QuitRequested()
+bool
+exportwindow::QuitRequested()
 {
-	Quit();
+	return true;
 }
+
 
 void exportwindow::MessageReceived(BMessage* message)
 {
@@ -242,7 +242,7 @@ void exportwindow::MessageReceived(BMessage* message)
 				item = dynamic_cast<ListItem *>(fList->ItemAt(i));
 				if (item)
 					{
-						char name[B_FILE_NAME_LENGTH];
+//						char name[B_FILE_NAME_LENGTH];
 						ref = item->Ref();
 						added_entry.SetTo(&ref, true);
 						added_entry.GetPath(&addpath);

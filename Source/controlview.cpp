@@ -21,17 +21,22 @@
 
 
 
-#ifndef CONTROLVIEW_H
 #include "controlview.h"
-#endif
 
-controlview::controlview(BRect rect, char *name)
-	   	   : BView(rect, name, B_FOLLOW_LEFT | B_FOLLOW_BOTTOM, B_WILL_DRAW)
+ControlView::ControlView(BRect rect, char *name)
+	:	BView(rect, name, B_FOLLOW_LEFT | B_FOLLOW_BOTTOM, B_WILL_DRAW)
 {
 	//define objects
-	btnMake = new BButton(BRect(5,5,rect.Width()-5,25), "btnMake", "Make", new BMessage(MAKE_MSG), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE | B_FULL_UPDATE_ON_RESIZE);
-	btnMakeClean = new BButton(BRect(5,30,rect.Width()-5,50), "btnMakeClean", "Make Clean", new BMessage(MAKECLEAN_MSG), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE | B_FULL_UPDATE_ON_RESIZE);
-	btnRun = new BButton(BRect(5,55,rect.Width()-5,75), "btnRun", "Run", new BMessage(RUN_MSG), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP, B_WILL_DRAW | B_NAVIGABLE | B_FULL_UPDATE_ON_RESIZE);
+	btnMake = new BButton(BRect(5,5,rect.Width()-5,25), "btnMake", "Make",
+						new BMessage(MAKE_MSG), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP,
+						B_WILL_DRAW | B_NAVIGABLE | B_FULL_UPDATE_ON_RESIZE);
+	btnMakeClean = new BButton(BRect(5,30,rect.Width()-5,50), "btnMakeClean",
+						"Make Clean", new BMessage(MAKECLEAN_MSG),
+						B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP,
+						B_WILL_DRAW | B_NAVIGABLE | B_FULL_UPDATE_ON_RESIZE);
+	btnRun = new BButton(BRect(5,55,rect.Width()-5,75), "btnRun", "Run",
+						new BMessage(RUN_MSG), B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP,
+						B_WILL_DRAW | B_NAVIGABLE | B_FULL_UPDATE_ON_RESIZE);
 	
 	// set objects
 	btnMake->SetEnabled(false);
@@ -42,6 +47,5 @@ controlview::controlview(BRect rect, char *name)
 	AddChild(btnMake);
 	AddChild(btnMakeClean);
 	AddChild(btnRun);
-	
 }
 

@@ -21,8 +21,8 @@
 
 
 
-#ifndef _barberwindow_H_
-#define _barberwindow_H_
+#ifndef BARBER_WINDOW_H
+#define BARBER_WINDOW_H
 
 #include <Application.h>
 #include <InterfaceKit.h>
@@ -36,11 +36,10 @@ const int FROM_LEFT_TO_RIGHT = 1;
 
 class BarberPole;
 
-
-class barberwindow : public BWindow
+class BarberWindow : public BWindow
 {
 	public:
-						barberwindow(const char *infoText);
+						BarberWindow(const char *infoText);
 		virtual void 	CenterWindow();
 		virtual bool	QuitRequested();
 	
@@ -51,23 +50,24 @@ class barberwindow : public BWindow
 
 };
 
-class BarberPole : public BView {
+class BarberPole : public BView
+{
 public:
-	BarberPole(BRect pRect, const char *pName, uint32 resizingMode, uint32 flags, int pDirection = FROM_LEFT_TO_RIGHT);
-	
-		void SetLowColor(rgb_color c);
-		void SetHighColor(rgb_color c);
-		void Draw(BRect rect);
-		void Pulse();
+						BarberPole(BRect pRect, const char *pName, uint32 resize,
+								uint32 flags,
+								int pDirection = FROM_LEFT_TO_RIGHT);
+			void		SetLowColor(rgb_color c);
+			void		SetHighColor(rgb_color c);
+			void		Draw(BRect rect);
+			void		Pulse();
 	
 private:
-	static void SetColors(rgb_color* colors, rgb_color c);
+	static	void		SetColors(rgb_color* colors, rgb_color c);
 	
-		int		fDirection;
-		pattern fStripes;
-		rgb_color fHighColors[BB_NUM_SHADES];
-		rgb_color fLowColors[BB_NUM_SHADES];
-
+			int			fDirection;
+			pattern		fStripes;
+			rgb_color	fHighColors[BB_NUM_SHADES];
+			rgb_color	fLowColors[BB_NUM_SHADES];
 };
 
 #endif

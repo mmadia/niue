@@ -37,10 +37,12 @@ docwindow::docwindow() :
 }
 
 
-bool docwindow::QuitRequested()
+bool
+docwindow::QuitRequested()
 {
-	Quit();
+	return true;
 }
+
 
 void docwindow::CenterWindow()
 {

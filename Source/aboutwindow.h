@@ -35,7 +35,7 @@
 #define		CLOSE_ABOUT_MSG		'CLAB'
 #define		SET_ABOUT_TEXT		'SABT'
 
-class webbutton;
+class WebButton;
 class aboutwindow : public BWindow
 {
 	public:
@@ -50,14 +50,13 @@ class aboutwindow : public BWindow
 		BButton*		btnClose;
 		BTextView*		lblAuthor;
 		BBitmap* 		AboutBitmap;
-		webbutton*		txtCredits;
-
+		WebButton*		txtCredits;
 };
 
-class webbutton : public BView
+class WebButton : public BView
 {
 	public:
-						webbutton(BRect rect, const char *name);
+						WebButton(BRect rect, const char *name);
 		virtual void	Draw(BRect);
 		virtual void	MouseDown(BPoint);
 	private:

@@ -30,32 +30,48 @@
 
 BufList *gb=NULL;
 
-BufList::BufList():BLocker("BufList"){
+BufList::BufList():BLocker("BufList")
+{
 	gb=this;
-	bf=new CList();
-	nl=new CList();
-	cnt=0;
-}
-
-BufList::~BufList(){
-}
-
-Buff *BufList::BuffAt(int32 index){
-	return index<cnt?(Buff*)bf->Item(index):NULL;
-}
-char *BufList::NameAt(int32 index){
-	return index<cnt?(char*)nl->Item(index):NULL;
+	fBufferList=new CList();
+	fNameList=new CList();
+	fCount=0;
 }
 
 
-void BufList::SetBuff(int32 index,Buff*bb){
+BufList::~BufList()
+{
+}
+
+
+Buff *
+BufList::BuffAt(int32 index)
+{
+	return index<fCount?(Buff*)fBufferList->Item(index):NULL;
+}
+
+
+char *
+BufList::NameAt(int32 index)
+{
+	return index<fCount?(char*)fNameList->Item(index):NULL;
+}
+
+
+void
+BufList::SetBuff(int32 index,Buff*bb)
+{
 //	printf("aw %d,%x\n",index,bb);
-	bf->SwapWith(bb,index);
+	fBufferList->SwapWith(bb,index);
 }
-void BufList::SetName(int32 i,const char *name){
-	char *s=(char*)nl->Item(i);
+
+
+void
+BufList::SetName(int32 i,const char *name)
+{
+	char *s=(char*)fNameList->Item(i);
 //	printf("Name Set (%d),(%x),(%s),%d\n",i,s,name,strlen(name));
 	if (!s)s=(char*)malloc(256);
 	strcpy(s,name);
-	nl->SwapWith(s,i);
+	fNameList->SwapWith(s,i);
 }

@@ -25,22 +25,19 @@
 #ifndef CONTROLVIEW_H
 #define CONTROLVIEW_H
 
-
 #include <Application.h>
 #include <InterfaceKit.h>
 #include "actions.h"
 
-class controlview : public BView {
-
-	public:
-						controlview(BRect frame, char *name); 
+class ControlView : public BView
+{
+public:
+						ControlView(BRect frame, char *name);
+						
 		BButton*		btnMake;
 		BButton*		btnMakeClean;
 		BButton*		btnRun;
-
-	private:
-	
-
+		
 };
 
 #endif

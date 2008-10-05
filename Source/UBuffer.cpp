@@ -267,7 +267,8 @@ void Buff::Undo(NiueWindow *yw,int32 cn,int32 &std1,int32 &std2,int32 dir){
 int32 Buff::AddChar(int32 cn,const char *s,int32 cnt,int32 dir){
 	if (cnt<=0) return 0;
 //	printf("AC %d\n",cnt);
-	int pl=Pos(cn),ppl=pl;
+	int pl=Pos(cn);
+//	int ppl=pl;
 	pl=BND(pl,1,mytree->Size()-1);
 	MoveTo(cn,pl);
 	PushDelete(pl,pl+cnt);
@@ -318,7 +319,7 @@ int32 Buff::AddCharReal(long cn,const char *s,long cnt)
 		while(cha)
 		{
 			int32 ll=Fetch(text, 1, i);
-			if(ll=1)
+			if(ll==1)
 			{
 				if(strncmp(text, " ", 1) == 0 || strncmp(text, "\t", 1) == 0 || strncmp(text, "\n", 1) == 0 || strncmp(text, ".", 1) == 0 || strncmp(text, ">", 1) == 0 || strncmp(text, "(", 1) == 0 || strncmp(text, ")", 1) == 0)
 				{
@@ -364,9 +365,8 @@ int32 Buff::Remove(int32 p0,int32 p1)
 		int32 len=p1-p0;
 		uo->dat=(char*)malloc(len);
 		int32 ll=mytree->Fetch(uo->dat,p1-p0,p0);
-		if (ll!=len){
-			printf("ARGH! %d,%d\n",ll,len);
-		}
+		if (ll!=len)
+			printf("ARGH! %ld,%ld\n",ll,len);
 		uo->type=1;
 		uo->p1=len;
 		Push(uo);
@@ -376,9 +376,8 @@ int32 Buff::Remove(int32 p0,int32 p1)
 	int32 ss1=mytree->Size();
 	int ss=mytree->Remove(p0,p1);
 	int32 ss2=mytree->Size();
-	if (ss1!=ss2+(p1-p0)){
-		printf("weird remove %d,%d  %d,%d\n",p0,p1,ss1,ss2);
-	}
+	if (ss1!=ss2+(p1-p0))
+		printf("weird remove %ld,%ld  %ld,%ld\n",p0,p1,ss1,ss2);
 //	printf("rem %d,%d\n",ll,p1-p0);
 	Balance((ntree**)&mytree);
 	return ss;
@@ -449,7 +448,8 @@ void Buff::GetFromEnt(entry_ref *er){
 		GetFile(&fil);
 		BNode   nod(&myent);
 		BNodeInfo myinfo(&nod);
-		status_t rr=myinfo.GetType(cmime);
+//		status_t rr=myinfo.GetType(cmime);
+		myinfo.GetType(cmime);
 	}
 }
 
@@ -491,39 +491,51 @@ void Buff::IndentiQuote(int32 cnum,YAction type,int32 &std1,int32 &std2){
 
 	int32 s1=0x7fffffff,s2=0;
 
-	char *tabs="        ";// 8 spaces..
+//	char *tabs="        ";// 8 spaces..
 	char spa[32];
 
 	nplace *np=mytree->FindPrev(10,p2-1);
 	nplace *bnp=np;
 
 	while (np){
-		switch (type){
+		switch (type)
+		{
 			case A_UNQUOTE:
+			{
 				ll=mytree->Fetch(spa,1,np->place+1);
-				if (ll && (spa[0]=='>')){
+				if (ll && (spa[0]=='>'))
 					Remove(np->place+1,np->place+2);
-				}
 				break;
+			}
 			case A_UNDENT:
+			{
 				ll=mytree->Fetch(spa,1,np->place+1);
-				if (ll && (spa[0]=='\t' || spa[0]==' ')){
+				if (ll && (spa[0]=='\t' || spa[0]==' '))
 					Remove(np->place+1,np->place+2);
-				}
 				break;
+			}
 			case A_QUOTE:
+			{
 				mytree->Insert(">",1,np->place+1);
 				PushDelete(np->place+1,np->place+2);
 				p2++;
 				break;
+			}
 			case A_INDENT:
+			{
 				mytree->Insert("\t",1,np->place+1);
 				PushDelete(np->place+1,np->place+2);
 				p2++;
 				break;
+			}
+			default:
+			{
+				break;
+			}
 		}
 		s1=np->place;
-		if (np->place<p1) break;
+		if (np->place<p1)
+			break;
 		np=mytree->FindPrev(10,np->place-1);
 	}
 	if (bnp){s2=bnp->CalcPlace();}
@@ -550,8 +562,9 @@ void Buff::PutMIMEType(int32 type){
 	}
 }
 
-void Buff::PutFile(BFile *f){
-	long n=0;
+void Buff::PutFile(BFile *f)
+{
+//	long n=0;
 
 	Own;
 	CheckBuff();
@@ -608,7 +621,8 @@ status_t Buff::Find(const char *src,int32 &x1,int32 &x2,int32 dir){
 	if (!src || !*src){return 0;}
 	CheckBuff();
 	int l1=strlen(src);
-	int l2=mytree->Fetch(mybuf,x2-x1,x1);
+//	int l2 = mytree->Fetch(mybuf,x2-x1,x1);
+	mytree->Fetch(mybuf,x2-x1,x1);
 	if (dir==1){
 		int pt=-1;
 		while (++pt<(x2-x1)){
@@ -647,7 +661,8 @@ int32 Buff::ReaderFunc(void *bu){
 		BAutolock l2(bb);
 		bb->Capture();
 		bb->PushMarker(10);
-		int32 dl=bb->AddChar(cn,(char*)mybuf,len);
+//		int32 dl=bb->AddChar(cn,(char*)mybuf,len);
+		bb->AddChar(cn,(char*)mybuf,len);
 //      bb->MoveFlat(cn,dl);
 		bb->TX(1026);
 	}
@@ -658,9 +673,9 @@ int32 Buff::ReaderFunc(void *bu){
 
 	char *dst=(char*)mybuf;
 	if (res){
-		dst+=sprintf(dst,"  Return Code=%d",res);
+		dst+=sprintf(dst,"  Return Code=%ld",res);
 		if (res<0 || res>9){
-			dst+=sprintf(dst,"(0x%x)",res);
+			dst+=sprintf(dst,"(0x%lx)",res);
 		}
 		beep();
 	}else{
@@ -673,7 +688,8 @@ int32 Buff::ReaderFunc(void *bu){
 	bb->expid=0;
 	bb->Capture();
 	bb->PushMarker(10);
-	int dl=bb->AddChar(cn,(char*)mybuf,strlen((char*)mybuf));
+//	int dl=bb->AddChar(cn,(char*)mybuf,strlen((char*)mybuf));
+	bb->AddChar(cn,(char*)mybuf,strlen((char*)mybuf));
 //      bb->MoveFlat(cn,dl);
 	bb->TX(1026);
 
@@ -919,16 +935,23 @@ long UTFWidth(char *s,long l){
 	return t;
 }
 
-long WidthUTF(char *s,long &l,long max){
-	if (!s)return 0;
-	int t=0,ff=0;
-	while (l>0 && t++<=max){
+
+long
+WidthUTF(char *s,long &l,long max)
+{
+	if (!s)
+		return 0;
+	int t = 0;
+//	int ff = 0;
+	while (l > 0 && t++ <= max)
+	{
 		uint c=*s++;
-		if ((c&0xc0)!=0x80){
-			if (c>31)l--;
-			if (c==9){
+		if ((c & 0xc0) != 0x80)
+		{
+			if (c > 31)
+				l--;
+			if (c == 9)
 				l-=4;
-			}
 		}
 	}
 	return t;
@@ -1025,51 +1048,76 @@ void Buff::MessageReceived(BMessage *msg){
 	}
 }
 
-void Buff::CCMsg(int32 am,int32 what,NiueWindow *yw){
-	char *str=NULL;
-	switch(what){
+
+void
+Buff::CCMsg(int32 am,int32 what,NiueWindow *yw)
+{
+	char *str = NULL;
+	switch (what)
+	{
 		case A_CUT_LINE:
 		case B_CUT:
-			str="Cut";
+		{
+			str = "Cut";
 			break;
+		}
 		case A_COPY_LINE:
 		case B_COPY:
-			str="Copy";
+		{
+			str = "Copy";
 			break;
+		}
 		case A_KILL_SELECTION:
-			str="Remove";
+		{
+			str = "Remove";
 			break;
+		}
 	}
 
-	char sha[256],*spa=sha;
-	if (am){
-		spa+=sprintf(spa,"%d byte",am);
-		if (am>1)*spa++='s';
-		*spa++=32;
-		spa+=sprintf(spa,"%s",str);
-	}else{
-		spa+=sprintf(spa,"Nothing to %s",str);
+	char sha[256], *spa=sha;
+	if (am)
+	{
+		spa += sprintf(spa,"%ld byte",am);
+		if (am > 1)
+			*spa++ = 's';
+		*spa++ = 32;
+		spa += sprintf(spa,"%s",str);
 	}
+	else
+		spa += sprintf(spa,"Nothing to %s",str);
 //	printf(yw,sha);
 }
 
 
-void Buff::MessageReceived2(BMessage *msg){
-	int32 dx=0,dy=0,am=0,txn=0;
-	int32 std2=0,std1=mytree->Size(),ls2=std2;
-	int32 pp1=-1,pp2=-1,ll=0,df=0;
-	char *text=NULL;msg->FindString("Text",(const char**)&text);
-	NiueWindow *yw=NULL;msg->FindPointer("YWin",(void**)&yw);
-
+void Buff::MessageReceived2(BMessage *msg)
+{
+	int32 dx = 0, dy = 0, am = 0, txn = 0;
+	int32 std2 = 0, std1 = mytree->Size();
+//	int32 ls2 = std2;
+	int32 pp1 = -1, pp2 = -1, ll = 0;
+//	int32 df = 0;
+	
+	char *text = NULL;
+	msg->FindString("Text",(const char**)&text);
+	
+	NiueWindow *yw = NULL;
+	msg->FindPointer("YWin",(void**)&yw);
+	
 	WinStats *ws=NULL;
-	if (yw){
-		for (int i=winlist->Num()-1;i>=0;i--){
+	if (yw)
+	{
+		for (int i=winlist->Num()-1;i>=0;i--)
+		{
 			WinStats *ww=(WinStats*)winlist->Item(i);
-			if (ww->yw==yw){ws=ww;break;}
+			if (ww->yw==yw)
+			{
+				ws = ww;
+				break;
+			}
 		}
-	}else{
-//      printf("eek, no win!\n"); // not too serious (!)
 	}
+//	else
+//      printf("eek, no win!\n"); // not too serious (!)
 
 	if (!ws)ws=(WinStats*)winlist->Item(0);
 	cws=ws;
@@ -1357,46 +1405,59 @@ void Buff::MessageReceived2(BMessage *msg){
 
 		case A_FIND_BACK:
 		case A_FIND_FORWARD:
+		{
+			char *txt = text;
+			text = NULL;
+			int res = 0;
+			if (!txt)
+				break;
+//			int ll = strlen(txt);
+			int32 bx1,bx2;
+			bx1 = Pos(curs) + 1;
+			bx2 = mytree->Size() - 1;
+			if (msg->what == A_FIND_FORWARD)
 			{
-				char *txt=text;text=NULL;
-				int res=0;
-				if (!txt) break;
-				int ll=strlen(txt);
-				int32 bx1,bx2;
-				bx1=Pos(curs)+1;
-				bx2=mytree->Size()-1;
-				if (msg->what==A_FIND_FORWARD){
-					res=Find(txt,bx1,bx2,1);
-					if (!res){
-						bx2=bx1;
-						bx1=1;
-						res=Find(txt,bx1,bx2,1);
-					}
-				}else{
-					int32 dd=bx2;
-					bx2=bx1;
-					bx1=1;
-					res=Find(txt,bx1,bx2,-1);
-					if (!res){
-						bx1=bx2;
-						bx2=dd;
-						res=Find(txt,bx1,bx2,-1);
-					}
+				res = Find(txt,bx1,bx2,1);
+				if (!res)
+				{
+					bx2 = bx1;
+					bx1 = 1;
+					res = Find(txt,bx1,bx2,1);
 				}
-				if (!res){beep();printf("Not Found");break;}
-				MIX(std1,std2,Pos(141));
-				MIX(std1,std2,Pos(142));
-				MoveTo(141,bx1);
-				MoveTo(142,bx2);
-				MoveTo(curs,bx1);
-				MIX(std1,std2,bx1);
-				MIX(std1,std2,bx2);
-//                    MyScrollTo(0,((2*by1-1)*fh-Bounds().Height())/2);
-				txn=1026;
-				DoFoc(yw);
-				printf("Found");
 			}
+			else
+			{
+				int32 dd = bx2;
+				bx2 = bx1;
+				bx1 = 1;
+				res = Find(txt,bx1,bx2,-1);
+				if (!res)
+				{
+					bx1 = bx2;
+					bx2 = dd;
+					res = Find(txt,bx1,bx2,-1);
+				}
+			}
+			if (!res)
+			{
+				beep();
+				printf("Not Found");
+				break;
+			}
+		
+			MIX(std1,std2,Pos(141));
+			MIX(std1,std2,Pos(142));
+			MoveTo(141,bx1);
+			MoveTo(142,bx2);
+			MoveTo(curs,bx1);
+			MIX(std1,std2,bx1);
+			MIX(std1,std2,bx2);
+//			MyScrollTo(0,((2*by1-1)*fh-Bounds().Height())/2);
+			txn=1026;
+			DoFoc(yw);
+			printf("Found");
 			break;
+		}
 		case A_ENTER_FIND_STRING:
 			{
 				pp1=Pos(141);
@@ -1417,8 +1478,10 @@ void Buff::MessageReceived2(BMessage *msg){
 			}
 			break;
 
-		case A_RAW_CHAR:break;
-		
+		case A_RAW_CHAR:
+		{
+			break;
+		}
 		case A_INSERT_SNIPPET:
 		{
 			const char *code;
@@ -1427,37 +1490,38 @@ void Buff::MessageReceived2(BMessage *msg){
 			
 			len = strlen(code);
 			PushMarker(10);
-			ll=Pos(curs);
+			ll = Pos(curs);
 			MIX(std1,std2,ll);
-			ll+=AddChar(curs,code,len,cws?cws->typedir:0);
+			ll += AddChar(curs,code,len,cws ? cws->typedir : 0);
 			MIX(std1,std2,ll);
-			txn=1026;
+			txn = 1026;
+			break;
 		}
-		break;
-
 		case A_INSERT_HINT:
 		{
 			const char *code;
 			msg->FindString("hint", &code);
 			int32 len, ll;
 			
-			
 			len = strlen(code);
 			PushMarker(10);
-			ll=Pos(curs);
+			ll = Pos(curs);
 			
 			//find the last typed word
 			char text[1];
 			bool cha = true;
-			int i = ll-1;
+			int i = ll - 1;
 			int j = 0;
-		
-			while(cha)
+			
+			while (cha)
 			{
-				int32 le=Fetch(text, 1, i);
-				if(le=1)
+				int32 le = Fetch(text, 1, i);
+				if (le == 1)
 				{
-					if(strncmp(text, " ", 1) == 0 || strncmp(text, "\t", 1) == 0 || strncmp(text, "\n", 1) == 0 || strncmp(text, ".", 1) == 0 || strncmp(text, ">", 1) == 0 || strncmp(text, "(", 1) == 0 || strncmp(text, ")", 1) == 0)
+					if (strncmp(text, " ", 1) == 0 || strncmp(text, "\t", 1) == 0 ||
+						strncmp(text, "\n", 1) == 0 || strncmp(text, ".", 1) == 0 ||
+						strncmp(text, ">", 1) == 0 || strncmp(text, "(", 1) == 0 ||
+						strncmp(text, ")", 1) == 0)
 					{
 						cha = false;
 					}
@@ -1469,24 +1533,28 @@ void Buff::MessageReceived2(BMessage *msg){
 				}
 			}
 			//and remove it
-			Remove(ll-j, ll);
-
+			Remove(ll - j, ll);
+			
+			MIX(std1, std2, ll);
+			ll += AddChar(curs, code, len, cws ? cws->typedir : 0);
 			MIX(std1,std2,ll);
-			ll+=AddChar(curs,code,len,cws?cws->typedir:0);
-			MIX(std1,std2,ll);
-			txn=1026;
+			txn = 1026;
+			break;
 		}
-		break;
-
 		default:
-			if  (yw){
+		{
+			if  (yw)
+			{
 //              printf("Msg sent here by mistake\n");
 				((BLooper*)yw)->PostMessage(msg);
-			}else{
+			}
+			else
+			{
 				printf("unknown Buff message..\n");
 				msg->PrintToStream();
 			}
 			break;
+		}
 	}
 
 	if (dx||dy){
@@ -1595,62 +1663,110 @@ int32 Buff::Register(WinStats *w){
 	return dce;
 }
 
-WinStats::WinStats(){}
-WinStats::~WinStats(){}
+
+WinStats::WinStats()
+{
+}
 
 
-long CountWhite(char *s,long max){
-	if (!s)return 0;
-	long c=0;
-	while (max-->0){
-		max-=1024;
-		if (*s==32){c++;max+=1024;}
-		if (*s==9 ){c+=4;max+=1024;}
+WinStats::~WinStats()
+{
+}
+
+
+long
+CountWhite(char *s,long max)
+{
+	if (!s)
+		return 0;
+	long c = 0;
+	while (max-- > 0)
+	{
+		max -= 1024;
+		if (*s == 32)
+		{
+			c++;
+			max += 1024;
+		}
+		if (*s==9)
+		{
+			c += 4;
+			max += 1024;
+		}
 		s++;
 	}
 	return c;
 }
 
-long TrailWhite(char *s,long st){
-	if (!s)return 0;
-	long c=st,d=0;
-	while (s[--c]==32&&d<2048)d++;
-	return (d);
+
+long
+TrailWhite(char *s,long st)
+{
+	if (!s)
+		return 0;
+	long c = st, d = 0;
+	while (s[--c] == 32 && d < 2048)
+		d++;
+	return d;
 }
 
-int32 Buff::Pos(int32 c){
-	if (c<0 || c>256){
-		printf("strange, asking for cursor %d\n",c);
+
+int32
+Buff::Pos(int32 c)
+{
+	if (c < 0 || c > 256)
+	{
+		printf("strange, asking for cursor %ld\n",c);
 		return -1;
 	}
-	nplace *np=mypos[c];
-	return np?np->CalcPlace():-1;
+	
+	nplace *np = mypos[c];
+	return np ? np->CalcPlace() : -1;
 }
-int32 Buff::Size(){
+
+
+int32
+Buff::Size()
+{
 	return mytree->Size();
 }
 
-void Buff::MoveTo(int32 c,int32 p){
+
+void
+Buff::MoveTo(int32 c,int32 p)
+{
 	now++;
-	if (c==128) now--;
-	if (c==140) now--;
-	if (c==144) now--;
-	if (c==148) now--;
-	if (c==152) now--;
-	if (c==156) now--;
-	if (c>=160 && c<=255)now--;
+	if (c == 128)
+		now--;
+	if (c == 140)
+		now--;
+	if (c == 144)
+		now--;
+	if (c == 148)
+		now--;
+	if (c == 152)
+		now--;
+	if (c == 156)
+		now--;
+	if (c>=160 && c<=255)
+		now--;
 	nplace *np=mypos[c];
-	if (p==-1){
+	if (p == -1)
+	{
 		np->Detach();
 		delete np;
-		mypos[c]=0;
-	}else{
-		p=BND(p,1,Size()-1);
-		if (!np) np=new nplace(c);
-		mytree->Attach(np,p);
-		mypos[c]=np;
+		mypos[c] = 0;
+	}
+	else
+	{
+		p = BND(p, 1, Size() - 1);
+		if (!np)
+			np = new nplace(c);
+		mytree->Attach(np, p);
+		mypos[c] = np;
 	}
 }
+
 
 void Buff::MoveFlat(int32 cn,int32 delta){
 	Own;

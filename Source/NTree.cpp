@@ -105,7 +105,7 @@ int ndata::Resize(){return siz;}
 
 int ndata::Remove(int p1,int p2){
 	int s=Size();
-	int pp1=p1;
+//	int pp1=p1;
 	p1=BND(p1,0,s);
 	p2=BND(p2,0,s);
 	if (p1==p2 || p2==0)return 0;

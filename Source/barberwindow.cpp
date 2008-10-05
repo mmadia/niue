@@ -25,7 +25,7 @@
 
 BRect rect(0,0,0,50);
 
-barberwindow::barberwindow(const char *infoText) :
+BarberWindow::BarberWindow(const char *infoText) :
 	BWindow(rect, "YourApp", B_MODAL_WINDOW,B_NOT_RESIZABLE)
 {
 	//resize window to text, and update rect
@@ -37,45 +37,46 @@ barberwindow::barberwindow(const char *infoText) :
 	SetPulseRate(100000); //for the barberpole
 	
 	// define objects
-	barber = new BarberPole(BRect(5,5,rect.Width()-5,rect.Height()-25), "barber", B_FOLLOW_TOP | B_FOLLOW_LEFT_RIGHT, 0, FROM_LEFT_TO_RIGHT);
-	InfoString = new BStringView(BRect(5,rect.Height()-20,rect.Width()-5,rect.Height()-5), "InfoString", infoText, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW);
+	barber = new BarberPole(BRect(5,5,rect.Width()-5,rect.Height()-25), "barber",
+							B_FOLLOW_TOP | B_FOLLOW_LEFT_RIGHT, 0, FROM_LEFT_TO_RIGHT);
+	AddChild(barber);
+	InfoString = new BStringView(BRect(5,rect.Height()-20,rect.Width()-5,rect.Height()-5),
+							"InfoString", infoText, B_FOLLOW_LEFT | B_FOLLOW_TOP, B_WILL_DRAW);
+	AddChild(InfoString);
 	
 	// set objects
 	rgb_color white = {255,255,255,0};
 	rgb_color green = {0,186,57,0};
 	barber->SetHighColor(green);
 	barber->SetLowColor(white);
-
-	
-	// add objects
-	AddChild(barber);
-	AddChild(InfoString);
-	
 }
 
 
-bool barberwindow::QuitRequested()
+bool
+BarberWindow::QuitRequested()
 {
-	
 	be_app_messenger.SendMessage(B_QUIT_REQUESTED);
 	return BWindow::QuitRequested();
 }
 
-void barberwindow::CenterWindow()
+
+void
+BarberWindow::CenterWindow()
 {
-	
 	BScreen mScreen(B_MAIN_SCREEN_ID);
 	BRect screenRes, winBounds;
-	screenRes.Set((mScreen.Frame().left), (mScreen.Frame().top), (mScreen.Frame().right), (mScreen.Frame().bottom));
+	screenRes = mScreen.Frame();
 	winBounds = Bounds();
 	
-	MoveBy((screenRes.right / 2) - (winBounds.right / 2), (screenRes.bottom / 2) - (winBounds.bottom / 2));
-	
+	MoveBy((screenRes.right / 2) - (winBounds.right / 2),
+			(screenRes.bottom / 2) - (winBounds.bottom / 2));
 }
 
-BarberPole::BarberPole(BRect pRect, const char *pName, uint32 resizingMode, uint32 flags, int pDirection)
-		: BView(pRect, pName, resizingMode, flags | B_WILL_DRAW | B_PULSE_NEEDED) {
-		
+
+BarberPole::BarberPole(BRect pRect, const char *pName, uint32 resizingMode, uint32 flags,
+						int pDirection)
+	:	BView(pRect, pName, resizingMode, flags | B_WILL_DRAW | B_PULSE_NEEDED)
+{
 	SetViewColor(B_TRANSPARENT_COLOR);
 	fStripes.data[0] = 0x0f;
 	fStripes.data[1] = 0x1e;
@@ -86,14 +87,15 @@ BarberPole::BarberPole(BRect pRect, const char *pName, uint32 resizingMode, uint
 	fStripes.data[6] = 0xc3;
 	fStripes.data[7] = 0x87;	
 	fDirection = pDirection;
-};
+}
 
 
-
-void BarberPole::SetColors(rgb_color* colors, rgb_color c) 
+void
+BarberPole::SetColors(rgb_color* colors, rgb_color c) 
 {
 	int alpha = 255/BB_NUM_SHADES;
-	for (int i = 0; i < BB_NUM_SHADES; i ++) {
+	for (int i = 0; i < BB_NUM_SHADES; i ++)
+	{
 		colors[i].red = c.red * alpha / 255;
 		colors[i].green = c.green * alpha / 255;
 		colors[i].blue = c.blue * alpha / 255;
@@ -102,24 +104,31 @@ void BarberPole::SetColors(rgb_color* colors, rgb_color c)
 	}
 }
 
-void BarberPole::SetLowColor(rgb_color c) 
+
+void
+BarberPole::SetLowColor(rgb_color c) 
 {
 	SetColors(fHighColors, c);
 }
 
-void BarberPole::SetHighColor(rgb_color c) 
+
+void
+BarberPole::SetHighColor(rgb_color c) 
 {
 	SetColors(fLowColors, c);
 }
 
 
-void BarberPole::Draw(BRect r) 
+void
+BarberPole::Draw(BRect r) 
 {
 	BRect b(Bounds());
 	BRect b1;
-	for (int i = 0; i < BB_NUM_SHADES; i ++) {
+	for (int i = 0; i < BB_NUM_SHADES; i ++)
+	{
 		BRegion r(b);
-		if (i != (BB_NUM_SHADES-1)) {
+		if (i != (BB_NUM_SHADES-1))
+		{
 			b1 = b.InsetByCopy(1, 1);
 			r.Exclude(b1);
 		}
@@ -130,18 +139,21 @@ void BarberPole::Draw(BRect r)
 	}
 }
 
-void BarberPole::Pulse() {
-	if(fDirection == FROM_RIGHT_TO_LEFT){
+
+void
+BarberPole::Pulse()
+{
+	if(fDirection == FROM_RIGHT_TO_LEFT)
+	{
 		uchar tmp = fStripes.data[0];
-		for (int j = 0; j < 7; ++j) {
+		for (int j = 0; j < 7; ++j)
   			fStripes.data[j] = fStripes.data[j+1];
-		}
 		fStripes.data[7] = tmp;
-	} else {
+	} else
+	{
 		uchar tmp = fStripes.data[7];
-		for (int j = 7; j > 0; --j) {
+		for (int j = 7; j > 0; --j)
   			fStripes.data[j] = fStripes.data[j-1];
-		}
 		fStripes.data[0] = tmp;
 	}
 	Invalidate();

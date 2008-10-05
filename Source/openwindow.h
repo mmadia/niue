@@ -21,8 +21,8 @@
 
 
 
-#ifndef _openwindow_H_
-#define _openwindow_H_
+#ifndef OPEN_WINDOW_H
+#define OPEN_WINDOW_H
 
 #include <Application.h>
 #include <InterfaceKit.h>
@@ -51,10 +51,11 @@
 
 class ProjectsView;
 class MainView;
-class openwindow : public BWindow
+
+class OpenWindow : public BWindow
 {
 	public:
-						openwindow();
+						OpenWindow();
 		virtual bool	QuitRequested();
 		virtual void 	CenterWindow();
 		

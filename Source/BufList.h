@@ -21,30 +21,32 @@
 
 
 #ifndef BUFLIST_H
-	#define BUFLIST_H
-	#include <Locker.h>
+#define BUFLIST_H
+#include <Locker.h>
 
-	class BList;
-	class Buff;
-	class NiueWindow;
+class BList;
+class Buff;
+class NiueWindow;
 
-	class BufList:public BLocker{
-		public:
+class BufList : public BLocker
+{
+public:
 			BufList();
-			virtual ~BufList();
+	virtual ~BufList();
 
-			Buff *BuffAt(int32 index);
-			char *NameAt(int32 index);
-			int32 Count(){return cnt;}
+	Buff *	BuffAt(int32 index);
+	char *	NameAt(int32 index);
+	int32 	Count() { return fCount; }
 
-			void SetBuff(int32 index,Buff *);
-			void SetName(int32 index,const char*);
-			void SetCount(int32 c){cnt=c;}
-		private:
-			CList *bf,*nl;
-			int32 cnt;
+	void	SetBuff(int32 index,Buff *);
+	void	SetName(int32 index,const char*);
+	void	SetCount(int32 c) { fCount = c; }
+	
+private:
+	CList *fBufferList,*fNameList;
+	int32 fCount;
+};
 
-	};
+extern BufList *gb; //Global Buffer List
 
-	extern BufList *gb; //Global Buffer List
 #endif //BUFLIST_H

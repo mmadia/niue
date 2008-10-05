@@ -38,11 +38,10 @@
 
 #define A_NEW_PROJECT	'vanp'
 
-class visualwindow : public BWindow
+class VisualWindow : public BWindow
 {
 	public:
-								visualwindow(BPoint point);
-		virtual bool			QuitRequested();
+								VisualWindow(BPoint point);
 		virtual void			MessageReceived(BMessage* message);
 		virtual void			BuildList();
 		BString					GetConstructors();

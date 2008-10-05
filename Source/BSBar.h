@@ -21,25 +21,26 @@
 
 
 #ifndef BSBAR_H
-	#define BSBAR_H
+#define BSBAR_H
 
-	#include <ScrollBar.h>
-	class CList;
+#include <ScrollBar.h>
+class CList;
 
-	class BSBar : public BScrollBar{
-	public:
-		BSBar(BRect frame, const char *name, \
-				port_id drawport, int32 min, int32 max, orientation posture);
-		virtual ~BSBar();
-		virtual void    ValueChanged(float nv);
-		void            ChangeIndex(float mult,void *newindex,float def);
-		void            Capture(float mult);
-	private:
-		float           lastv;      // Last Value
-		port_id         drprt;    //Draw Port
-		CList           *bflist;    //index list
-		CList           *valist;    //Value list
-		void           *lastindex;
-	};
+class BSBar : public BScrollBar
+{
+public:
+					BSBar(BRect frame, const char *name, port_id drawport, int32 min, int32 max,
+						orientation posture);
+	virtual			~BSBar();
+	virtual	void	ValueChanged(float nv);
+			void	ChangeIndex(float mult,void *newindex,float def);
+			void	Capture(float mult);
+private:
+			float	fLastValue;
+			port_id	fDrawPort;
+			CList	*fIndexList;
+			CList	*fValueList;
+			void	*fLastIndex;
+};
 
 #endif

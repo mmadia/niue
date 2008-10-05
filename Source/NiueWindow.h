@@ -84,7 +84,7 @@
 		Mover*			mvrVert;
 		Mover*			mvrHorz;
 		listview*		vwList;
-		controlview*	vwControl;
+		ControlView*	vwControl;
 		outputview*		vwOutput;
 		BRect			frame;
 		BView*			vwFill;

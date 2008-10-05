@@ -23,59 +23,62 @@
 
 
 #ifndef CBLIST_H
-	#define CBLIST_H
+#define CBLIST_H
 
-	class CList{
-		public:
+class CList
+{
+public:
 			CList(int num=16);
 			~CList();
-			CList &operator= (const CList &);
+	CList &	operator= (const CList &);
 
-			void Reset();
-			int Num() const;
+	void	Reset();
+	int		Num() const;
 
-			int Load(const char *src,int maxsize=-1);
-			int Save(char *dst,int maxsize=-1);
+	int		Load(const char *src,int maxsize=-1);
+	int		Save(char *dst,int maxsize=-1);
 
-			int Merge(const CList &); // non-shared points..
+	int		Merge(const CList &); // non-shared points..
 
-			long operator[] (int index) const;
-			long Item(int index) const;
-			void *ItemV(int index) const;
-			float ItemF(int index) const;
+	long	operator[] (int index) const;
+	long	Item(int index) const;
+	void *	ItemV(int index) const;
+	float	ItemF(int index) const;
 
-			void Add(long value);
-			void Add(long value,long index);
-			void Add(const void *value);
-			void Add(const void *value,long index);
-			void AddF(float value);
-			void AddF(float value,long index);
+	void	Add(long value);
+	void	Add(long value,long index);
+	void	Add(const void *value);
+	void	Add(const void *value,long index);
+	void	AddF(float value);
+	void	AddF(float value,long index);
 
-			void SwapWith(long value,long index);
-			void SwapWith(const void *value,long index);
-			void SwapWithF(float value,long index);
+	void	SwapWith(long value,long index);
+	void	SwapWith(const void *value,long index);
+	void	SwapWithF(float value,long index);
+	
+	int		IndexOf(long value) const;
+	int		IndexOf(const void *value) const;
+	bool	operator<= (long value) const;   //contains..
+	bool	operator<= (const void*value) const;   //contains..
 
-			int IndexOf(long value) const;
-			int IndexOf(const void *value) const;
-			bool operator<= (long value) const;   //contains..
-			bool operator<= (const void*value) const;   //contains..
+	void	RemIndex(long index);
 
-			void RemIndex(long index);
+	int		Save(int type,int (*SaveItem)(CList *,void *,char *,int),char *dest,
+				int maxsize);
 
-			int Save(int type,int (*SaveItem)(CList *,void *,char *,int),char *dest,int maxsize);
+private:
+	void	CheckMax(long nucount);
+	
+	long	mycount;
+	long	*data;
+	long	max;
+};
 
-		private:
-			long    mycount;
-			long    *data;
-			long    max;
-			void CheckMax(long nucount);
-	};
-
-	inline long CList::operator[] (int index)const {return Item(index);}
-	inline int CList::Num()  const {return mycount;}
-	inline void CList::Add(long vv){Add(vv,mycount);}
-	inline void CList::AddF(float vv){AddF(vv,mycount);}
-	inline void CList::Add(const void *vv){Add(vv,mycount);}
+inline long CList::operator[] (int index)const { return Item(index); }
+inline int CList::Num()  const { return mycount; }
+inline void CList::Add(long vv) { Add(vv,mycount); }
+inline void CList::AddF(float vv) { AddF(vv,mycount); }
+inline void CList::Add(const void *vv) { Add(vv,mycount); }
 
 #endif
 

@@ -25,41 +25,42 @@
 #include <be/app/Application.h>
 #include <be/app/Roster.h>
 
-
-
 #include "IconMenu.h"
 
-
-TIconMenu::TIconMenu(BBitmap* icon, BMenu* menu) :
-        BMenuItem(menu),
-        bounds(),
+TIconMenu::TIconMenu(BBitmap* icon, BMenu* menu)
+	:	BMenuItem(menu),
         iconLabel(NULL)
 {
-    if (icon) {
+    if (icon)
+    {
         bounds = icon->Bounds();
         iconLabel = new BBitmap(bounds, B_COLOR_8_BIT);
         iconLabel->SetBits(icon->Bits(), icon->BitsLength(), 0, B_COLOR_8_BIT);
     }
 }
 
-TIconMenu::TIconMenu(BMenu* menu) :
-        BMenuItem(menu),
+
+TIconMenu::TIconMenu(BMenu* menu)
+	:	BMenuItem(menu),
         bounds(0.0, 0.0, 15.0, 15.0),
         iconLabel(NULL)
 {
     app_info info;
-    if (be_app->GetAppInfo(&info) == B_NO_ERROR) {
+    if (be_app->GetAppInfo(&info) == B_OK)
+    {
         BFile appFile(&(info.ref), O_RDONLY);
         BAppFileInfo appFileInfo(&appFile);
 
         iconLabel = new BBitmap(bounds, B_COLOR_8_BIT);
 
-        if (appFileInfo.GetIcon(iconLabel, B_MINI_ICON) != B_NO_ERROR) {
+        if (appFileInfo.GetIcon(iconLabel, B_MINI_ICON) != B_OK)
+        {
             delete iconLabel;
             iconLabel = NULL;
         }
     }
 }
+
 
 TIconMenu::~TIconMenu()
 {
@@ -67,9 +68,12 @@ TIconMenu::~TIconMenu()
     iconLabel = NULL;
 }
 
-void TIconMenu::GetContentSize(float* width, float* height)
+
+void
+TIconMenu::GetContentSize(float* width, float* height)
 {
-    if (iconLabel) {
+    if (iconLabel)
+    {
         *width = bounds.Width();
         *height = bounds.Height();
     }
@@ -77,22 +81,24 @@ void TIconMenu::GetContentSize(float* width, float* height)
         BMenuItem::GetContentSize(width, height);
 }
 
-void TIconMenu::DrawContent()
+
+void
+TIconMenu::DrawContent()
 {
-    if (iconLabel) {
+    if (iconLabel)
+    {
         Menu()->SetDrawingMode(B_OP_OVER);
-
+		
         float width, height;
-
+		
         Menu()->GetPreferredSize(&width, &height);
-
+		
         BRect destBounds = bounds;
         destBounds.OffsetBy(8.0, ((height - bounds.Height()) * 0.5) - 1);
-
+		
         // Scaling the icon is left as an exercise for the reader :)
         Menu()->DrawBitmap(iconLabel, bounds, destBounds);
     }
     else
         BMenuItem::DrawContent();
 }
-
