@@ -190,83 +190,86 @@ NiueWindow::NiueWindow(BRect frame,Buff *bb)
 		mprv(NULL)
 {
 	SetPulseRate(0.0);
-	static int32 cnt = 1;wincnt = atomic_add(&cnt,1);
-
+	static int32 cnt = 1; wincnt = atomic_add(&cnt,1);
+	
 	IsHScroll = true;
-
+	
 	char tempname[128];
 	sprintf(tempname,"#%ld DrawPort",wincnt);
-	drprt = create_port(32,tempname);
-
+	fDrawPort = create_port(32,tempname);
+	
 	vsplit = 200; //vertical mover
 	hsplit = 515;	//horizontal mover
 	ysplit = 400; //doclist|buttons
 	xsplit = 600;	//output|hints
-
+	
 	topmenu = new BMenuBar(BRect(0,0,frame.Width(),14),"TopMenu",
-		B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP,B_ITEMS_IN_ROW,TRUE);
-
+							B_FOLLOW_LEFT_RIGHT | B_FOLLOW_TOP,B_ITEMS_IN_ROW,TRUE);
 	CreateMenus(topmenu);
 	AddChild(topmenu);
 
 	MyMetrics();
 	
-	scbv = new BSBar(rsbv,"ScrV",drprt,0,100,B_VERTICAL);
-	scbh = new BSBar(rsbh,"ScrH",drprt,0,600,B_HORIZONTAL);
+	scbv = new BSBar(rsbv,"ScrV",fDrawPort,0,100,B_VERTICAL);
+	scbh = new BSBar(rsbh,"ScrH",fDrawPort,0,600,B_HORIZONTAL);
 	
-	mvrVert = new Mover(rmover,B_FOLLOW_LEFT|B_FOLLOW_TOP_BOTTOM,true);
-	mvrHorz = new Mover(hmover,B_FOLLOW_LEFT_RIGHT|B_FOLLOW_BOTTOM,false);
+	fVMover = new Mover(rmover,B_FOLLOW_LEFT|B_FOLLOW_TOP_BOTTOM,true);
+	fHMover = new Mover(hmover,B_FOLLOW_LEFT_RIGHT|B_FOLLOW_BOTTOM,false);
 	
-	myview = new BMapView(this,bb,rmyview,"NIUE:BMView",scbv,scbh,drprt);
+	fMapView = new BMapView(this,bb,rmyview,"NIUE:BMView",scbv,scbh,fDrawPort);
 	
-	vwList = new listview(rlist, "vwList");
+	fListView = new listview(rlist, "fListView");
 	
-	vwControl = new ControlView(rcontrol, "vwControl");
+	fControlView = new ControlView(rcontrol, "fControlView");
 	
-	vwOutput = new outputview(routput, "vwOuput");
+	fOutputView = new OutputView(routput, "vwOuput");
 	
-	vwHint = new HintView(rhint, "vwHint");
+	fHintView = new HintView(rhint, "fHintView");
 	
-	vwFill = new BView(rfill, "vwFill", B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM, B_WILL_DRAW);
+	fFillView = new BView(rfill, "fFillView", B_FOLLOW_RIGHT | B_FOLLOW_BOTTOM, B_WILL_DRAW);
 	
 	//set objects
-	vwList->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	vwControl->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
-	vwHint->SetViewColor(blueish);
-	vwFill->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	fListView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	fControlView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
+	fHintView->SetViewColor(blueish);
+	fFillView->SetViewColor(ui_color(B_PANEL_BACKGROUND_COLOR));
 	mycurs = ((wincnt-1)&3)*4 + 140;
-	myview->ChangeCursor(mycurs);
+	fMapView->ChangeCursor(mycurs);
 	
 	//searchview
-	sview = new StatusView(rssv,"StView",drprt);
-	sview->SetSearch("Search");
-	sview->SetReplace("Replace");
+	fStatusView = new StatusView(rssv,"StView",fDrawPort);
+	fStatusView->SetSearch("Search");
+	fStatusView->SetReplace("Replace");
 	
 	ChangeBuff(bb);
 	
 	//add objects
-	AddChild(mvrHorz);
-	AddChild(mvrVert);
-	AddChild(myview);
-	AddChild(vwControl);
+	AddChild(fHMover);
+	AddChild(fVMover);
+	AddChild(fMapView);
+	AddChild(fControlView);
 	AddChild(scbh);
 	AddChild(scbv);
-	AddChild(vwList);
-	AddChild(sview);
-	AddChild(vwOutput);
-	AddChild(vwHint);
-	AddChild(vwFill);
+	AddChild(fListView);
+	AddChild(fStatusView);
+	AddChild(fOutputView);
+	AddChild(fHintView);
+	AddChild(fFillView);
 	
 	//ugly hack to bring menu to front
 	RemoveChild(topmenu);
 	AddChild(topmenu);
 	
 	FixDisp();
-	myview->MakeFocus();
+	fMapView->MakeFocus();
 	
 	sprintf(tempname,"#%ld Renderer",wincnt);
-	drth = spawn_thread(MyDraw,tempname,B_DISPLAY_PRIORITY,myview);
-	if (drth>0){resume_thread(drth);}else{drth = 0;}
+	fDrawThread = spawn_thread(MyDraw,tempname,B_DISPLAY_PRIORITY,fMapView);
+	if (fDrawThread > 0)
+		resume_thread(fDrawThread);
+	else
+		fDrawThread = 0;
+	
 	SetPulseRate(500000.0);
 	
 //	mback->FindItem("Light")->SetMarked(true);
@@ -280,17 +283,17 @@ NiueWindow::NiueWindow(BRect frame,Buff *bb)
 
 NiueWindow::~NiueWindow()
 {
-	if (drprt)
+	if (fDrawPort)
 	{
-		delete_port(drprt);
-		drprt = 0;
+		delete_port(fDrawPort);
+		fDrawPort = 0;
 	}
 	
-	if (drth)
+	if (fDrawThread)
 	{
 		long temp;
-		wait_for_thread(drth,&temp);
-		drth = 0;
+		wait_for_thread(fDrawThread,&temp);
+		fDrawThread = 0;
 	}
 }
 
@@ -333,7 +336,7 @@ NiueWindow::LoadPrefs()
 			doCodeCompletion = icode;
 			mwin->ItemAt(6)->SetMarked(doCodeCompletion);
 			if (doCodeCompletion == false)
-				vwHint->SetViewColor(white);
+				fHintView->SetViewColor(white);
 		}
 		else
 		{
@@ -361,7 +364,7 @@ NiueWindow::LoadPrefs()
 void
 NiueWindow::SavePrefs()
 {
-	//now let's save the settigns
+	//now let's save the settings
 	BPath prefspath;
 	
 	//find prefsfile
@@ -376,7 +379,7 @@ NiueWindow::SavePrefs()
 	
 //		msg.Unflatten(&prefsfile);		
 		//font
-		FFont ff(myview->myfont);
+		FFont ff(fMapView->myfont);
 		AddMessageFont(&msg,"font",&ff);
 		
 		//code completion
@@ -402,23 +405,23 @@ NiueWindow::MyMetrics()
 
 	mbh = topmenu->Bounds().Height();
 
-	frame = Bounds();
+	fFrame = Bounds();
 
-	float bx = frame.Width()-B_V_SCROLL_BAR_WIDTH;
-	float by = frame.Height();
+	float bx = fFrame.Width()-B_V_SCROLL_BAR_WIDTH;
+	float by = fFrame.Height();
 	if (IsHScroll)
 		by -= B_H_SCROLL_BAR_HEIGHT;
 	
-	rmover = BRect(vsplit-6,mbh + 1,vsplit-1,frame.Height());
-	hmover = BRect(vsplit-1,ysplit + 1,frame.Width(),ysplit + 6);
+	rmover = BRect(vsplit-6,mbh + 1,vsplit-1,fFrame.Height());
+	hmover = BRect(vsplit-1,ysplit + 1,fFrame.Width(),ysplit + 6);
 	rlist = BRect(0,mbh,vsplit-7,hsplit);
-	rcontrol = BRect(0,hsplit + 1,vsplit-7,frame.Height());
+	rcontrol = BRect(0,hsplit + 1,vsplit-7,fFrame.Height());
 	rmyview = BRect(vsplit,mbh + 2.0,bx,ysplit-sh-B_H_SCROLL_BAR_HEIGHT-1);    //BMapView
-	routput = BRect(vsplit,ysplit + 7,xsplit,frame.Height());
-	rhint = BRect(xsplit,ysplit + 7,frame.Width(),frame.Height());
-	rsbv = BRect(bx + 1.0,mbh + 1.0,frame.Width() + 1.0,ysplit-B_H_SCROLL_BAR_HEIGHT-sh-1);
+	routput = BRect(vsplit,ysplit + 7,xsplit,fFrame.Height());
+	rhint = BRect(xsplit,ysplit + 7,fFrame.Width(),fFrame.Height());
+	rsbv = BRect(bx + 1.0,mbh + 1.0,fFrame.Width() + 1.0,ysplit-B_H_SCROLL_BAR_HEIGHT-sh-1);
 	rsbh = BRect(vsplit,ysplit-B_H_SCROLL_BAR_HEIGHT-sh,bx,ysplit-sh);
-	rssv = BRect(vsplit,ysplit + 1.0-sh,frame.Width(),ysplit);
+	rssv = BRect(vsplit,ysplit + 1.0-sh,fFrame.Width(),ysplit);
 	rfill = BRect(bx,ysplit-B_H_SCROLL_BAR_HEIGHT-sh,bx + B_V_SCROLL_BAR_WIDTH,ysplit-sh);
 
 	SetSizeLimits(vsplit + B_V_SCROLL_BAR_WIDTH,30000,mbh,30000);   //mbh = menu bar height
@@ -436,12 +439,12 @@ NiueWindow::Shove(BView *src,BRect dest)
 void
 NiueWindow::FixDisp()
 {
-	Shove(myview,rmyview);
+	Shove(fMapView,rmyview);
 	Shove(scbh,rsbh);
-//	sview->RemoveChild(sview->mrv);
-	Shove(sview,rssv);
+//	fStatusView->RemoveChild(fStatusView->mrv);
+	Shove(fStatusView,rssv);
 //	if (IsMsg)
-//		sview->AddChild(sview->mrv);
+//		fStatusView->AddChild(fStatusView->mrv);
 //	RemoveChild(scbh);
 //	if (IsHScroll)
 //		AddChild(scbh);
@@ -457,7 +460,7 @@ NiueWindow::AddFile(entry_ref fileref)
 	BPath filepath, projpath;
 	fileentry.GetName(name);
 	fileentry.GetPath(&filepath);
-	entry.GetPath(&projpath);
+	fEntry.GetPath(&projpath);
 	
 	BString addstring;
 	addstring << "cp ";
@@ -480,22 +483,22 @@ void
 NiueWindow::LoadDir(entry_ref dirref)
 {
 	//get reference
-	entry.SetTo(&dirref);
-	entry.GetRef(&ref);
+	fEntry.SetTo(&dirref);
+	fEntry.GetRef(&fRef);
 	
 	//build filelist and show makefile
-	vwList->BuildList(ref);
+	fListView->BuildList(fRef);
 	
 	//start to watch the directory for changes
 	node_ref nref;
-	entry.GetNodeRef(&nref);
+	fEntry.GetNodeRef(&nref);
 	watch_node(&nref, B_WATCH_DIRECTORY, this);
 	
 	//get project's path
 	BString titlestring;
 	BPath projectpath;
 	
-	entry.GetPath(&projectpath);
+	fEntry.GetPath(&projectpath);
 	titlestring << "Niue -  ";
 	titlestring << projectpath.Path();
 	
@@ -518,12 +521,12 @@ NiueWindow::LoadDir(entry_ref dirref)
 	mwin->ItemAt(1)->SetEnabled(true);
 
 	//buttons
-	vwControl->btnMake->SetEnabled(true);
-	vwControl->btnMakeClean->SetEnabled(true);
-	vwControl->btnRun->SetEnabled(true);
+	fControlView->btnMake->SetEnabled(true);
+	fControlView->btnMakeClean->SetEnabled(true);
+	fControlView->btnRun->SetEnabled(true);
 
 	//empty outputview
-	vwOutput->ClearText();
+	fOutputView->ClearText();
 	
 	//and let the world know we have open project
 	hasProjectOpen = true;
@@ -707,7 +710,7 @@ NiueWindow::CreateMenus(BMenu *mbar)
 void
 NiueWindow::MoveCurs(int cx,int cy)
 {
-	sview->SetPos(cx,cy);
+	fStatusView->SetPos(cx,cy);
 }
 
 
@@ -787,7 +790,7 @@ NiueWindow::GotoLine(BMessage *msg)
 
 			cb->PostMessage(&ms);
 		}
-		myview->MakeFocus();
+		fMapView->MakeFocus();
 	}
 }
 
@@ -801,21 +804,21 @@ NiueWindow::ChangeBuff(Buff *bb)
 
 	if (cb)
 	{
-		cb->DeRegister(myview->ws);
+		cb->DeRegister(fMapView->ws);
 		cb = NULL;
 	}
 	
 	cb = bb;
 //    CheckTitle();
-	int32 tn = cb->Register(myview->ws);
-	if (myview)
+	int32 tn = cb->Register(fMapView->ws);
+	if (fMapView)
 	{
-		myview->ChangeBuff(bb);
-		myview->targetnum = tn;
+		fMapView->ChangeBuff(bb);
+		fMapView->targetnum = tn;
 	}
 	
-	if (drprt)
-		write_port(drprt,SCROLL,&bb,0);
+	if (fDrawPort)
+		write_port(fDrawPort,SCROLL,&bb,0);
 }
 
 
@@ -823,18 +826,18 @@ void
 NiueWindow::HandleFontDrop(BMessage *msg)
 {
 //	msg->PrintToStream();
-	BFont nufont = myview->myfont;
+	BFont nufont = fMapView->myfont;
 	FindMessageFont(msg,"font",0,&nufont);
-	if (nufont == myview->myfont)
+	if (nufont == fMapView->myfont)
 		return;
 	
 	double oldh,oldv;
-	oldh = myview->scbh->Value();
-	oldv = myview->scbv->Value()/myview->fh;
-	myview->myfont = nufont;
-	myview->FrameResized(0,0);
-	myview->FlickTo(oldh,oldv*myview->fh);
-	myview->Invalidate(myview->Bounds());
+	oldh = fMapView->scbh->Value();
+	oldv = fMapView->scbv->Value()/fMapView->fh;
+	fMapView->myfont = nufont;
+	fMapView->FrameResized(0,0);
+	fMapView->FlickTo(oldh,oldv*fMapView->fh);
+	fMapView->Invalidate(fMapView->Bounds());
 	DoMenuFontName();
 	DoMenuFontSize();
 }
@@ -860,75 +863,75 @@ NiueWindow::MessageReceived(BMessage *msg)
 				
 				//warning, horrible math below...
 				
-				if (mv == mvrVert)
+				if (mv == fVMover)
 				{				
 					BPoint p = ConvertFromScreen(BPoint(coord,0));
 								
 					//left views
-					vwControl->ResizeTo(p.x,vwControl->Frame().Height());
-					vwList->ResizeTo(p.x,vwList->Frame().Height());
+					fControlView->ResizeTo(p.x,fControlView->Frame().Height());
+					fListView->ResizeTo(p.x,fListView->Frame().Height());
 							
 					//right views
-					myview->ResizeTo(((Frame().Width())-(B_V_SCROLL_BAR_WIDTH + 1))-p.x-mvrVert->Frame().Width(),myview->Frame().Height());
-					myview->MoveTo(p.x + mvrVert->Frame().Width() + 1,myview->Frame().top);
+					fMapView->ResizeTo(((Frame().Width())-(B_V_SCROLL_BAR_WIDTH + 1))-p.x-fVMover->Frame().Width(),fMapView->Frame().Height());
+					fMapView->MoveTo(p.x + fVMover->Frame().Width() + 1,fMapView->Frame().top);
 					
-					sview->ResizeTo(Frame().Width()-p.x-mvrVert->Frame().Width(),rssv.Height());
-					sview->MoveTo(p.x + mvrVert->Frame().Width() + 1,sview->Frame().top);
+					fStatusView->ResizeTo(Frame().Width()-p.x-fVMover->Frame().Width(),rssv.Height());
+					fStatusView->MoveTo(p.x + fVMover->Frame().Width() + 1,fStatusView->Frame().top);
 					
-					scbh->ResizeTo(Frame().Width()-(B_V_SCROLL_BAR_WIDTH + 1)-p.x-mvrVert->Frame().Width(),rsbh.Height());
-					scbh->MoveTo(p.x + mvrVert->Frame().Width() + 1,scbh->Frame().top);
+					scbh->ResizeTo(Frame().Width()-(B_V_SCROLL_BAR_WIDTH + 1)-p.x-fVMover->Frame().Width(),rsbh.Height());
+					scbh->MoveTo(p.x + fVMover->Frame().Width() + 1,scbh->Frame().top);
 					
-					vwOutput->ResizeTo(Frame().Width()-vwHint->Frame().Width()-p.x-mvrVert->Frame().Width()-1,vwOutput->Frame().Height());
-					vwOutput->MoveTo(p.x + mvrVert->Frame().Width() + 1,vwOutput->Frame().top);
+					fOutputView->ResizeTo(Frame().Width()-fHintView->Frame().Width()-p.x-fVMover->Frame().Width()-1,fOutputView->Frame().Height());
+					fOutputView->MoveTo(p.x + fVMover->Frame().Width() + 1,fOutputView->Frame().top);
 					
 					//moverts
-					mvrVert->MoveTo(p.x,mvrVert->Frame().top);
-					mvrHorz->ResizeTo((Frame().Width())-p.x-mvrVert->Frame().Width(),hmover.Height());
-					mvrHorz->MoveTo(p.x + mvrVert->Frame().Width() + 1,mvrHorz->Frame().top);
+					fVMover->MoveTo(p.x,fVMover->Frame().top);
+					fHMover->ResizeTo((Frame().Width())-p.x-fVMover->Frame().Width(),hmover.Height());
+					fHMover->MoveTo(p.x + fVMover->Frame().Width() + 1,fHMover->Frame().top);
 					
 					//size limits
 					SetSizeLimits(p.x + 4 + B_V_SCROLL_BAR_WIDTH,30000,mbh,30000);
 				}
-				else if (mv == mvrHorz)
+				else if (mv == fHMover)
 				{
 					BPoint p = ConvertFromScreen(BPoint(0,coord));
 					
 					//top views
-					scbv->ResizeTo(scbv->Frame().Width(), p.y-(sview->Frame().Height() + B_H_SCROLL_BAR_HEIGHT + mbh + 3));
+					scbv->ResizeTo(scbv->Frame().Width(), p.y-(fStatusView->Frame().Height() + B_H_SCROLL_BAR_HEIGHT + mbh + 3));
 					
-					myview->ResizeTo(myview->Frame().Width(), p.y-(sview->Frame().Height() + B_H_SCROLL_BAR_HEIGHT + mbh + 4));
+					fMapView->ResizeTo(fMapView->Frame().Width(), p.y-(fStatusView->Frame().Height() + B_H_SCROLL_BAR_HEIGHT + mbh + 4));
 					
-					scbh->MoveTo(scbh->Frame().left, p.y-(B_H_SCROLL_BAR_HEIGHT + sview->Frame().Height() + 1));
+					scbh->MoveTo(scbh->Frame().left, p.y-(B_H_SCROLL_BAR_HEIGHT + fStatusView->Frame().Height() + 1));
 					
-					sview->MoveTo(sview->Frame().left, p.y-sview->Frame().Height());
+					fStatusView->MoveTo(fStatusView->Frame().left, p.y-fStatusView->Frame().Height());
 					
-					vwFill->MoveTo(vwFill->Frame().left, p.y-(vwFill->Frame().Height() + sview->Frame().Height() + 1));
+					fFillView->MoveTo(fFillView->Frame().left, p.y-(fFillView->Frame().Height() + fStatusView->Frame().Height() + 1));
 					
 					//bottom views
-					vwOutput->ResizeTo(vwOutput->Frame().Width(), Frame().Height()-p.y-mvrHorz->Frame().Height());
-					vwOutput->MoveTo(vwOutput->Frame().left, p.y + mvrHorz->Frame().Height() + 1);
+					fOutputView->ResizeTo(fOutputView->Frame().Width(), Frame().Height()-p.y-fHMover->Frame().Height());
+					fOutputView->MoveTo(fOutputView->Frame().left, p.y + fHMover->Frame().Height() + 1);
 					
-					vwHint->ResizeTo(vwHint->Frame().Width(), Frame().Height()-p.y-mvrHorz->Frame().Height());
-					vwHint->MoveTo(vwHint->Frame().left, p.y + mvrHorz->Frame().Height() + 1);
+					fHintView->ResizeTo(fHintView->Frame().Width(), Frame().Height()-p.y-fHMover->Frame().Height());
+					fHintView->MoveTo(fHintView->Frame().left, p.y + fHMover->Frame().Height() + 1);
 					
 					//movert
-					mvrHorz->MoveTo(mvrHorz->Frame().left, p.y);					
+					fHMover->MoveTo(fHMover->Frame().left, p.y);					
 				}
 			}
 			break;
 		}	
 		case B_MOUSE_WHEEL_CHANGED:
 		{
-			if (myview->IsFocus())
+			if (fMapView->IsFocus())
 			{
 				float x, y, wheel;
 				
 				msg->FindFloat("be:wheel_delta_y", &wheel);
 				
-				x = myview->tax;
-				y = myview->tay;
+				x = fMapView->tax;
+				y = fMapView->tay;
 				
-				myview->FlickTo(x,y + wheel*20);
+				fMapView->FlickTo(x,y + wheel*20);
 				
 				BString teststring;
 				teststring << "x: " << x;
@@ -940,13 +943,13 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case A_NEW_PROJECT:
 		{
-//			if (!SavePanel)
+//			if (!fSavePanel)
 //			{
-				SavePanel = new BFilePanel(B_SAVE_PANEL, 0, 0, 0, false, new BMessage(NEW_PROJECT_MSG), 0, false, true);
-				SavePanel->SetTarget(this);
-				SavePanel->SetSaveText("project name");
-				SavePanel->Window()->SetTitle("Niue: Select a location to save your project folder");
-				SavePanel->Show();
+				fSavePanel = new BFilePanel(B_SAVE_PANEL, 0, 0, 0, false, new BMessage(NEW_PROJECT_MSG), 0, false, true);
+				fSavePanel->SetTarget(this);
+				fSavePanel->SetSaveText("project name");
+				fSavePanel->Window()->SetTitle("Niue: Select a location to save your project folder");
+				fSavePanel->Show();
 //			}
 			break;
 		}
@@ -987,26 +990,26 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case A_BROWSE_PANEL:
 		{
-			wdwOpen = new OpenWindow;
-			wdwOpen->Show();
+			fOpenWindow = new OpenWindow;
+			fOpenWindow->Show();
 			break;
 		}
 		case N_HELP_REQUESTED:
 		{
-			wdwHelp = new docwindow;
-			wdwHelp->Show();
+			fHelpWindow = new docwindow;
+			fHelpWindow->Show();
 			break;
 		}
 		case A_SHOW_VD:
 		{
-			wdwVisual = new VisualWindow(BPoint(Bounds().left + 50,Bounds().top + 50));
-			wdwVisual->Show();
+			fVisualWindow = new VisualWindow(BPoint(Bounds().left + 50,Bounds().top + 50));
+			fVisualWindow->Show();
 			break;
 		}
 		case A_SHOW_SM:
 		{
-			wdwSnippet = new snippetwindow();
-			wdwSnippet->Show();
+			fSnippetWindow = new snippetwindow();
+			fSnippetWindow->Show();
 			break;
 		}
 		case A_SHOW_BB:
@@ -1030,15 +1033,15 @@ NiueWindow::MessageReceived(BMessage *msg)
 			if (hasProjectOpen)
 			{
 				BPath path;
-				entry.GetPath(&path);
+				fEntry.GetPath(&path);
 				
-				wdwGrep = new grepwindow(path.Path());
-				wdwGrep->Show();	
+				fGrepWindow = new grepwindow(path.Path());
+				fGrepWindow->Show();	
 			}
 			else
 			{
-				wdwGrep = new grepwindow("/boot/home");
-				wdwGrep->Show();	
+				fGrepWindow = new grepwindow("/boot/home");
+				fGrepWindow->Show();	
 			}
 			break;						
 		}
@@ -1061,8 +1064,8 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case A_FIND_DIALOG:
 		{
-			sview->srv->MakeFocus();
-			sview->srv->SelectAll();
+			fStatusView->srv->MakeFocus();
+			fStatusView->srv->SelectAll();
 			break;
 		}
 		case B_KEY_DOWN + 1:
@@ -1073,8 +1076,8 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case Y_GOTO_LINE:
 		{
-			sview->yrv->MakeFocus();
-			sview->yrv->SelectAll();
+			fStatusView->yrv->MakeFocus();
+			fStatusView->yrv->SelectAll();
 			break;
 		}
 		case Y_HSCROLL_ON:
@@ -1086,10 +1089,10 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case Y_SYSFONT_CHANGE:
 		{
-			sview->xrv->SetFontAndColor(be_plain_font2);
-			sview->yrv->SetFontAndColor(be_plain_font2);
-			sview->srv->SetFontAndColor(be_plain_font2);
-			sview->rrv->SetFontAndColor(be_plain_font2);
+			fStatusView->xrv->SetFontAndColor(be_plain_font2);
+			fStatusView->yrv->SetFontAndColor(be_plain_font2);
+			fStatusView->srv->SetFontAndColor(be_plain_font2);
+			fStatusView->rrv->SetFontAndColor(be_plain_font2);
 			MyMetrics();
 			FixDisp();
 			break;
@@ -1098,17 +1101,17 @@ NiueWindow::MessageReceived(BMessage *msg)
 		{
 			char *t = NULL;
 			msg->FindString("Text",(const char**)&t);
-			if (t) sview->SetSearch(t);
+			if (t) fStatusView->SetSearch(t);
 			break;
 		}
 		case S_RESET_FOCUS:
 		{
-			myview->MakeFocus();
+			fMapView->MakeFocus();
 			int32 ll = -1;
 			msg->FindInt32("Pos",&ll);
 			if (ll>-1){
-				myview->CleanScrollers();
-				myview->MyScrollTo(ll);
+				fMapView->CleanScrollers();
+				fMapView->MyScrollTo(ll);
 			}
 			break;
 		}
@@ -1143,11 +1146,11 @@ NiueWindow::MessageReceived(BMessage *msg)
 //			}
 //
 //			//code view
-//			myview->vb->csh = schemetab[tt];
-//			myview->Invalidate(myview->Bounds());
+//			fMapView->vb->csh = schemetab[tt];
+//			fMapView->Invalidate(fMapView->Bounds());
 //			
 //			//outputview
-//			vwOutput->ChangeBackstyle(tt);
+//			fOutputView->ChangeBackstyle(tt);
 //			break;
 		case '!FNT':
 		{
@@ -1157,19 +1160,19 @@ NiueWindow::MessageReceived(BMessage *msg)
 		case A_REPLACE_THIS:
 		{
 			msg->AddPointer("YWin",this);
-			msg->AddString("Text",sview->rrv->Text());
+			msg->AddString("Text",fStatusView->rrv->Text());
 			cb->PostMessage(msg);
 			break;
 		}
 		case A_FIND_BACK:
 		case A_FIND_FORWARD:
 		{
-			if (!sview->srv->Text()[0])
-				myview->MakeFocus();
+			if (!fStatusView->srv->Text()[0])
+				fMapView->MakeFocus();
 			else
 			{
 				msg->AddPointer("YWin",this);
-				msg->AddString("Text",sview->srv->Text());
+				msg->AddString("Text",fStatusView->srv->Text());
 				cb->PostMessage(msg);
 			}
 			break;
@@ -1181,7 +1184,7 @@ NiueWindow::MessageReceived(BMessage *msg)
 		case B_PASTE:
 		{
 			BView *tg = CurrentFocus();
-			if (tg == myview)
+			if (tg == fMapView)
 			{
 				msg->AddPointer("YWin",this);
 				cb->PostMessage(msg);
@@ -1230,7 +1233,7 @@ NiueWindow::MessageReceived(BMessage *msg)
 			
 			//(new BAlert("Niue", "Node Monitor!", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 			//reload file list
-			vwList->BuildList(ref);
+			fListView->BuildList(fRef);
 			
 			//check out waht has happened
 			int32 opcode;
@@ -1240,46 +1243,46 @@ NiueWindow::MessageReceived(BMessage *msg)
 				if (opcode == B_ENTRY_CREATED)  //hey, a new file in our project dir
 				{
 					msg->FindString("name", &name);  //which file?
-					vwList->SelectByName(name);
+					fListView->SelectByName(name);
 				}
 			}
 			break;
 		}
 		case MAKE_MSG:
 		{
-			vwOutput->ClearText();
+			fOutputView->ClearText();
 			
-			BPath path(&entry);
+			BPath path(&fEntry);
 			BString command;
 			command << "cd " << path.Path() << "; make 2>&1";
 			
 			//(new BAlert("Niue", command.String(), "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 			
-			vwOutput->DisplayShellProcess(command.String());			
+			fOutputView->DisplayShellProcess(command.String());			
 			break;
 		}
 		case MAKECLEAN_MSG:
 		{
-			vwOutput->ClearText();
+			fOutputView->ClearText();
 			
-			BPath path(&entry);
+			BPath path(&fEntry);
 			BString command;
 			command << "cd " << path.Path() << "; make clean 2>&1";
 
-			result = vwOutput->DisplayShellProcess(command.String());
+			fResult = fOutputView->DisplayShellProcess(command.String());
 
-			if (result == 0)
+			if (fResult == 0)
 			{
 				command = "";
 				command << "cd " << path.Path() << "; make 2>&1";
 				//(new BAlert("Niue", command.String(), "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
-				vwOutput->DisplayShellProcess(command.String());				
+				fOutputView->DisplayShellProcess(command.String());				
 			}
 			break;
 		}
 		case RUN_MSG:
 		{
-			BPath path(&entry);
+			BPath path(&fEntry);
 			BString pathstring = path.Path();
 			pathstring << "/obj.x86/";
 
@@ -1302,14 +1305,14 @@ NiueWindow::MessageReceived(BMessage *msg)
 				}
 			}
 			
-			vwOutput->ClearText();
+			fOutputView->ClearText();
 			
 			BString command;
 			command << "cd " << path.Path() << "; make 2>&1";
 			
-			result = vwOutput->DisplayShellProcess(command.String());
+			fResult = fOutputView->DisplayShellProcess(command.String());
 			
-			if (result == 0)
+			if (fResult == 0)
 			{
 				//find & run app
 				BDirectory dir(pathstring.String());
@@ -1345,7 +1348,7 @@ NiueWindow::MessageReceived(BMessage *msg)
 		case A_BACKUP_APP:
 		{
 			char name[B_FILE_NAME_LENGTH];
-			entry.GetName(name);
+			fEntry.GetName(name);
 			
 //			BDateTime* DateTime = new BDateTime();
 //			uint32 nDay = DateTime->Day();
@@ -1363,13 +1366,13 @@ NiueWindow::MessageReceived(BMessage *msg)
 			BString backname;
 			backname << name << "-backup";  // << datestring;
 			
-//			if (!BackupPanel)
+//			if (!fBackupPanel)
 //			{
-				BackupPanel = new BFilePanel(B_SAVE_PANEL, 0, &ref, 0, false, new BMessage(BACKUP_PROJECT_MSG), 0, false, true);
-				BackupPanel->SetTarget(this);
-				BackupPanel->SetSaveText(backname.String());
-				BackupPanel->Window()->SetTitle("Niue: Select a location to save your backup");
-				BackupPanel->Show();
+				fBackupPanel = new BFilePanel(B_SAVE_PANEL, 0, &fRef, 0, false, new BMessage(BACKUP_PROJECT_MSG), 0, false, true);
+				fBackupPanel->SetTarget(this);
+				fBackupPanel->SetSaveText(backname.String());
+				fBackupPanel->Window()->SetTitle("Niue: Select a location to save your backup");
+				fBackupPanel->Show();
 //			}	
 			break;
 		}
@@ -1385,7 +1388,7 @@ NiueWindow::MessageReceived(BMessage *msg)
 			BPath export_path(&export_entry);
 //			export_path.Append("/");
 			export_path.Append(export_name.String());
-			BPath proj_path(&entry);
+			BPath proj_path(&fEntry);
 
 			
 			BString backstring;
@@ -1398,8 +1401,8 @@ NiueWindow::MessageReceived(BMessage *msg)
 		}
 		case A_EXPORT_APP:
 		{
-			wdwExport = new exportwindow(entry);
-			wdwExport->Show();
+			fExportWindow = new exportwindow(fEntry);
+			fExportWindow->Show();
 			break;
 		}
 		case A_REVERT_FACTORY:
@@ -1425,15 +1428,15 @@ NiueWindow::MessageReceived(BMessage *msg)
 			if (mwin->ItemAt(6)->IsMarked())
 			{
 				doCodeCompletion = false;
-				vwHint->SetViewColor(white);
-				vwHint->Invalidate();
+				fHintView->SetViewColor(white);
+				fHintView->Invalidate();
 				mwin->ItemAt(6)->SetMarked(false);
 			}
 			else
 			{
 				doCodeCompletion = true;
-				vwHint->SetViewColor(blueish);
-				vwHint->Invalidate();
+				fHintView->SetViewColor(blueish);
+				fHintView->Invalidate();
 				mwin->ItemAt(6)->SetMarked(true);
 			}
 			break;
@@ -1450,39 +1453,39 @@ NiueWindow::MessageReceived(BMessage *msg)
 				result = ComparePart(lookup, strlen(lookup));
 				if (result.CountItems() > 0)
 				{	
-					vwHint->lstHints->MakeEmpty();
-					vwHint->lstHints->AddList(&result);
+					fHintView->lstHints->MakeEmpty();
+					fHintView->lstHints->AddList(&result);
 				}
 				else
-					vwHint->lstHints->MakeEmpty();	
+					fHintView->lstHints->MakeEmpty();	
 			}
 			break;
 		}
 		case A_INSERT_HINT:
 		{
-			msg->AddString("hint", dynamic_cast<BStringItem*>(vwHint->lstHints->ItemAt(vwHint->lstHints->CurrentSelection()))->Text());
+			msg->AddString("hint", dynamic_cast<BStringItem*>(fHintView->lstHints->ItemAt(fHintView->lstHints->CurrentSelection()))->Text());
 			cb->PostMessage(msg);
 			
-			vwHint->lstHints->MakeEmpty();
-			myview->MakeFocus(true);
+			fHintView->lstHints->MakeEmpty();
+			fMapView->MakeFocus(true);
 			break;
 		}
 		case A_GEN_MAKEFILE:
 		{
-			wdwMake = new makefilewindow(entry);
-			wdwMake->Show();
+			fMakeWindow = new makefilewindow(fEntry);
+			fMakeWindow->Show();
 			break;
 		}
 		case A_FILE_UP:
 		{
 //			(new BAlert("Niue", "File up", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 			
-			if (vwList->fList->CurrentSelection() > 0)
-				vwList->fList->Select(vwList->fList->CurrentSelection()-1);
+			if (fListView->fList->CurrentSelection() > 0)
+				fListView->fList->Select(fListView->fList->CurrentSelection()-1);
 			else
 			{
-				if (vwList->fList->CountItems() > 1)
-					vwList->fList->Select(1);  //item 0 is the header
+				if (fListView->fList->CountItems() > 1)
+					fListView->fList->Select(1);  //item 0 is the header
 			}
 			break;
 		}
@@ -1490,12 +1493,12 @@ NiueWindow::MessageReceived(BMessage *msg)
 		{
 //			(new BAlert("Niue", "File down", "Ok", 0, 0, B_WIDTH_AS_USUAL, B_WARNING_ALERT))->Go();
 				
-			if (vwList->fList->CurrentSelection() > 0)
-				vwList->fList->Select(vwList->fList->CurrentSelection() + 1);
+			if (fListView->fList->CurrentSelection() > 0)
+				fListView->fList->Select(fListView->fList->CurrentSelection() + 1);
 			else
 			{
-				if (vwList->fList->CountItems() > 1)
-					vwList->fList->Select(1);  //item 0 is the header
+				if (fListView->fList->CountItems() > 1)
+					fListView->fList->Select(1);  //item 0 is the header
 			}
 			break;
 		}
@@ -1534,7 +1537,7 @@ NiueWindow::DoMenuFontName()
 	int32 idx,nft;
 	uint32  flags;
 	
-	BFont nufont = myview->myfont;
+	BFont nufont = fMapView->myfont;
 	
 	font_family curfam;
 	font_style cursty;
@@ -1588,7 +1591,7 @@ NiueWindow::DoMenuFontSize()
 {
 	if (!fsize)
 		return;
-	float myf = myview->myfont.Size();
+	float myf = fMapView->myfont.Size();
 	float fss[50],temp;
 	float dff[] = {6,8,10,12,15,20,24,30,50,0};
 	int idx;
@@ -1643,7 +1646,7 @@ NiueWindow::DoMenuFontSize()
 	}
 	fss[max] = 0.0;
 
-	BFont nufont = myview->myfont;
+	BFont nufont = fMapView->myfont;
 	for (idx = 0; idx < max; idx++)
 	{
 		BMenuItem *it = fsize->ItemAt(idx);
@@ -1677,8 +1680,8 @@ NiueWindow::MenusBeginning()
 void
 NiueWindow::ScreenChanged(BRect, color_space depth)
 {
-	//    printf("cspace was %x, now %x\n",myview->cspace,depth);
-	myview->cspace = depth;
+	//    printf("cspace was %x, now %x\n",fMapView->cspace,depth);
+	fMapView->cspace = depth;
 }
 
 
@@ -1768,7 +1771,7 @@ StatusView::MyNav(STextView *src,int dir)
 {
 	if (src == NULL)
 	{
-		((NiueWindow*)Window())->myview->MakeFocus();
+		((NiueWindow*)Window())->fMapView->MakeFocus();
 		return;
 	}
 	dir = (dir>0)?1:-1;

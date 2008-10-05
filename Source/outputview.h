@@ -32,18 +32,17 @@
 #include <iostream>
 #include "colors.h"
 
-class outputview : public BView {
+class OutputView : public BView
+{
+public:
+					OutputView(BRect frame, char *name);
+	virtual void	FrameResized(float width, float height);
+			int		DisplayShellProcess(const char *command);
+	virtual void	ClearText();
 
-	public:
-						outputview(BRect frame, char *name);
-		virtual void	FrameResized(float width, float height);
-		int				DisplayShellProcess(const char *command);
-		virtual void	ClearText();
-
-	private:
-	
-		BScrollView*	scrollView;
-		BTextView*		tView;
+private:
+		BScrollView	*fScrollView;
+		BTextView	*fTextView;
 };
 
 #endif

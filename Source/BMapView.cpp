@@ -256,10 +256,10 @@ BMapView::DoKeyDown(const char *bytes, int32 key,int32 mod)
 //				}
 				case B_F12_KEY:
 				{
-					if(ws->yw->vwHint->lstHints->CountItems() > 0)
+					if(ws->yw->fHintView->lstHints->CountItems() > 0)
 					{
-						ws->yw->vwHint->lstHints->MakeFocus(true);
-						ws->yw->vwHint->lstHints->Select(0);	
+						ws->yw->fHintView->lstHints->MakeFocus(true);
+						ws->yw->fHintView->lstHints->Select(0);	
 					}
 					break;
 				}
@@ -349,10 +349,10 @@ BMapView::DoKeyDown(const char *bytes, int32 key,int32 mod)
 //				ws->yw->wdwHint->Unlock();
 //			}
 
-//			if(ws->yw->vwHint->lstHints->CountItems() > 0)
+//			if(ws->yw->fHintView->lstHints->CountItems() > 0)
 //			{
-//				ws->yw->vwHint->lstHints->MakeFocus(true);
-//				ws->yw->vwHint->lstHints->Select(0);	
+//				ws->yw->fHintView->lstHints->MakeFocus(true);
+//				ws->yw->fHintView->lstHints->Select(0);	
 //			}
 //			else
 //			{

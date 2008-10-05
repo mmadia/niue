@@ -500,7 +500,8 @@ NiueApplication::MessageReceived(BMessage *msg)
 		case S_ACTION_CHANGE_MSG:
 		{
 			yw=(NiueWindow*)winlist->Item(0);
-			if(yw->wdwSnippet) yw->wdwSnippet->PostMessage(msg);
+			if (yw->fSnippetWindow)
+				yw->fSnippetWindow->PostMessage(msg);
 			break;
 		}	
 		case A_SHOW_SM:
@@ -572,12 +573,12 @@ NiueApplication::MessageReceived(BMessage *msg)
 			if(buffer->lastchanged != 0)
 			{
 				NiueWindow *yw=(NiueWindow*)winlist->Item(0);
-				yw->vwList->UpdateList(buffname, true);				
+				yw->fListView->UpdateList(buffname, true);				
 			}
 			else
 			{
 				NiueWindow *yw=(NiueWindow*)winlist->Item(0);
-				yw->vwList->UpdateList(buffname, false);
+				yw->fListView->UpdateList(buffname, false);
 			}
 			break;
 		}
